@@ -3,11 +3,11 @@ import * as jwt from "jsonwebtoken";
 import config from "../config";
 
 export const checkJwt = (req: Request, res: Response, next: NextFunction) => {
-  const token = <string>req.headers["auth"];
+  const token = req.headers["auth"] as string;
 
   let jwtPayload;
   try {
-    jwtPayload = <any>jwt.verify(token, config.jwtSecret);
+    jwtPayload = jwt.verify(token, config.jwtSecret) as any;
     res.locals.jwtPayload = jwtPayload;
   } catch (error) {
     return res.status(401).json({ error: "auth" });
@@ -25,11 +25,11 @@ export const checkJwt = (req: Request, res: Response, next: NextFunction) => {
 };
 
 export const checkNoJwt = (req: Request, res: Response, next: NextFunction) => {
-  const token = <string>req.headers["auth"];
+  const token = req.headers["auth"] as string;
 
   let jwtPayload;
   try {
-    jwtPayload = <any>jwt.verify(token, config.jwtSecret);
+    jwtPayload = jwt.verify(token, config.jwtSecret) as any;
     return res.status(400).json({ error: "already_logged_in" });
   } catch (error) {
     next();

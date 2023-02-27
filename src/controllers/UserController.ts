@@ -14,7 +14,7 @@ class UserController {
       return res.status(404).json({ error: "no_such_user" });
     }
 
-    return user.asPublic();
+    res.json(user.asPublic());
   };
 
   static newUser = async (req: Request, res: Response) => {
