@@ -26,10 +26,10 @@ AppDataSource.initialize()
     //Catchall
     app.use((req, res) => {
       res.status(404);
-      if (req.accepts('json')) {
-        return res.json({ error: 'not_found' });
+      if (req.accepts("json")) {
+        return res.json({ error: "not_found" });
       }
-      res.type('txt').send('Not Found');
+      res.type("txt").send("Not Found");
     });
 
     const httpServer: Server = app.listen(PORT, () =>

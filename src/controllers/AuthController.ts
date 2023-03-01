@@ -21,11 +21,11 @@ class AuthController {
         user = await userRepository.findOne({ where: { login } });
       } catch (error) {
         console.error(error);
-        return res.status(500).json({ error: 'internal' });
+        return res.status(500).json({ error: "internal" });
       }
 
       if (!user) {
-        return res.status(404).json({ error: 'no_such_user' });
+        return res.status(404).json({ error: "no_such_user" });
       }
     }
 
@@ -60,11 +60,11 @@ class AuthController {
         user = await userRepository.findOne(id);
       } catch (error) {
         console.error(error);
-        return res.status(500).json({ error: 'internal' });
+        return res.status(500).json({ error: "internal" });
       }
 
       if (!user) {
-        return res.status(404).json({ error: 'no_such_user' });
+        return res.status(404).json({ error: "no_such_user" });
       }
     }
 
