@@ -2,13 +2,13 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  Unique,
   CreateDateColumn,
   UpdateDateColumn
 } from "typeorm";
 
 import { Length, IsNotEmpty } from "class-validator";
 import * as bcrypt from "bcryptjs";
+import { API } from "../api";
 
 @Entity()
 export class User {
@@ -16,15 +16,15 @@ export class User {
   id: number;
 
   @Column()
-  @Length(4, 50)
+  @Length(API.LOGIN_MIN_LEN, API.LOGIN_MAX_LEN)
   login: string;
 
   @Column()
-  @Length(6, 254)
+  @Length(API.EMAIL_MIN_LEN, API.EMAIL_MAX_LEN)
   email: string;
 
   @Column()
-  @Length(8, 127)
+  @Length(API.PASSWORD_MIN_LEN, API.PASSWORD_MAX_LEN)
   password: string;
 
   @Column()
@@ -43,7 +43,15 @@ export class User {
     return bcrypt.compareSync(unencryptedPassword, this.password);
   }
 
-  asPublic() {
-    return { id: this.id, login: this.login, email: this.email };
+  asPublic(): API.User.PublicUser {
+    return { id: this.id, login: this.login };
+  }
+
+  asRestricted(): API.User.RestrictedUser {
+    return { ...this.asPublic(), email: this.email };
+  }
+
+  asSelf(): API.User.SelfUser {
+    return { ...this.asRestricted(), createdAt: this.createdAt };
   }
 }
