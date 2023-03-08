@@ -5,7 +5,7 @@ import { validate } from "class-validator";
 
 import { User } from "../entity/User";
 import config from "../config";
-import { API } from "../api";
+import { API } from "../typings/api";
 import { accept } from ".";
 
 class AuthController {
@@ -15,7 +15,7 @@ class AuthController {
       return [404, { error: "no_such_user" }];
     }
 
-    if (!user.checkIfUnencryptedPasswordIsValid(creds.password)) {
+    if (!(await user.passwordMatches(creds.password))) {
       return [401, { error: "invalid_password" }];
     }
 
@@ -56,7 +56,7 @@ class AuthController {
       }
     }
 
-    if (!user.checkIfUnencryptedPasswordIsValid(oldPassword)) {
+    if (!(await user.passwordMatches(oldPassword))) {
       return [401, { error: "invalid_password" }];
     }
 

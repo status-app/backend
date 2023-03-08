@@ -1,15 +1,15 @@
 import { Length, Matches } from "class-validator";
-import { sealed } from "./util/sealed.dec";
-
-export const EMAIL_REGEX = new RegExp("([!#-'*+/-9=?A-Z^-~-]+(\.[!#-'*+/-9=?A-Z^-~-]+)*|\"\(\[\]!#-[^-~ \t]|(\\[\t -~]))+\")@([!#-'*+/-9=?A-Z^-~-]+(\.[!#-'*+/-9=?A-Z^-~-]+)*|\[[\t -Z^-~]*])");
+import { sealed } from "../util/sealed.dec";
 
 export declare namespace API {
+  export const EMAIL_REGEX = "([!#-'*+/-9=?A-Z^-~-]+(\.[!#-'*+/-9=?A-Z^-~-]+)*|\"\(\[\]!#-[^-~ \t]|(\\[\t -~]))+\")@([!#-'*+/-9=?A-Z^-~-]+(\.[!#-'*+/-9=?A-Z^-~-]+)*|\[[\t -Z^-~]*])";
+
   export const LOGIN_MIN_LEN = 3;
   export const LOGIN_MAX_LEN = 32;
-
+  
   export const PASSWORD_MIN_LEN = 8;
   export const PASSWORD_MAX_LEN = 64;
-
+  
   export const EMAIL_MIN_LEN = 6;
   export const EMAIL_MAX_LEN = 128;
 

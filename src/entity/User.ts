@@ -6,9 +6,9 @@ import {
   UpdateDateColumn
 } from "typeorm";
 
-import { Length, IsNotEmpty } from "class-validator";
+import { Length, Matches } from "class-validator";
 import * as bcrypt from "bcryptjs";
-import { API } from "../api";
+import { API } from "../typings/api";
 
 @Entity()
 export class User {
@@ -20,6 +20,7 @@ export class User {
   login: string;
 
   @Column()
+  @Matches(API.EMAIL_REGEX)
   @Length(API.EMAIL_MIN_LEN, API.EMAIL_MAX_LEN)
   email: string;
 
@@ -39,8 +40,8 @@ export class User {
     this.password = bcrypt.hashSync(this.password, 8);
   }
 
-  checkIfUnencryptedPasswordIsValid(unencryptedPassword: string) {
-    return bcrypt.compareSync(unencryptedPassword, this.password);
+  async passwordMatches(unencryptedPassword: string): Promise<boolean> {
+    return bcrypt.compare(unencryptedPassword, this.password);
   }
 
   asPublic(): API.User.PublicUser {

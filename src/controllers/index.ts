@@ -1,6 +1,6 @@
 import { validate } from "class-validator";
 import { Request, Response } from "express";
-import { API } from "../api";
+import { API } from "../typings/api";
 
 export const accept = <T extends API.Request.Request, R>(
   fun: (req: Request, res: Response, data: T) => Promise<[number, R | API.Error]>
