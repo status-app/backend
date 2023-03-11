@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { validate } from "class-validator";
 
-import { User } from "../entity/User";
+import { User } from "../entities/User";
 import { userRepo } from "../data-source";
 
 class UserController {

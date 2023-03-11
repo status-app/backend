@@ -1,9 +1,8 @@
-import { Request, Response } from "express";
 import * as jwt from "jsonwebtoken";
 import { userRepo } from "../data-source";
 import { validate } from "class-validator";
 
-import { User } from "../entity/User";
+import { User } from "../entities/User";
 import config from "../config";
 import { API } from "../typings/api";
 import { accept } from ".";

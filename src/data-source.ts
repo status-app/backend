@@ -1,5 +1,5 @@
 import { DataSource, Repository } from "typeorm";
-import { User } from "./entity/User";
+import { User } from "./entities/User";
 
 // TODO .env
 
@@ -8,9 +8,9 @@ export const AppDataSource = new DataSource({
   database: "run/db.sqlite",
   synchronize: true,
   logging: true,
-  entities: [ "src/entity/**/*.ts" ],
-  subscribers: [ "src/subscriber/**/*.ts" ],
-  migrations: [ "src/migration/**/*.ts" ],
+  entities: [ "src/entities/**/*.ts" ],
+  subscribers: [ "src/subscribers/**/*.ts" ],
+  migrations: [ "src/migrations/**/*.ts" ],
 });
 
 export const userRepo = (): Repository<User> => AppDataSource.getRepository(User);
