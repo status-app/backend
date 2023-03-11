@@ -1,9 +1,15 @@
-import { validate } from "class-validator";
+import { validate, ValidationError } from "class-validator";
 import { Request, Response } from "express";
+import { FindOneOptions, FindOptionsWhere } from "typeorm";
+import { userRepo } from "../data-source";
+import { User } from "../entities/User";
+import { ApiError } from "../errors/ApiError";
+import { InvalidError } from "../errors/InvalidError";
+import { NoSuchItemError } from "../errors/NoSuchError";
 import { API } from "../typings/api";
 
 export const accept = <T extends API.Request.Request, R>(
-  fun: (req: Request, res: Response, data: T) => Promise<[number, R | API.Error]>
+  fun: (data: T, req: Request, res: Response) => Promise<[number, R | API.Error]>
 ) => (async (req: Request, res: Response): Promise<any> => {
   const data = req.body as T;
 
@@ -13,10 +19,27 @@ export const accept = <T extends API.Request.Request, R>(
   }
 
   try {
-    const [status, resData] = await fun(req, res, data);
+    const [status, resData] = await fun(data, req, res);
     res.status(status).json(resData);
-  } catch (ex) {
-    console.error(ex);
-    res.status(500).json({ error: "internal" });
+  } catch (err) {
+    console.log(err.stack || err);
+    if (!(err instanceof API.Error)) {
+      console.log("the above error was not issued by the api!");
+      err = new ApiError(); // use default error message
+    }
+    return res.status(err.code).json({ error: err.message });
   }
 });
+
+export const findUser = async (where: FindOptionsWhere<User>, password: string = null) => {
+  const user: User = await userRepo().findOne({ where });
+  if (!user) {
+    throw new NoSuchItemError("user");
+  }
+
+  if (password !== null && !(await user.passwordMatches(password))) {
+    throw new InvalidError("password");
+  }
+
+  return user;
+}

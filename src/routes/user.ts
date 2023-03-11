@@ -10,8 +10,8 @@ export default Router()
 
   .get("/:id([0-9]+)", [checkJwt], UserController.getOneById)
 
-  .post("/", [checkNoJwt], UserController.newUser)
+  .post("/", [checkNoJwt], UserController.createOne)
 
-  .patch("/:id([0-9]+)", [checkJwt], UserController.editUser) 
+  .patch("/:id([0-9]+)", [checkJwt], UserController.edit) 
 
 // .delete("/:id([0-9]+)", [checkJwt], UserController.deleteUser);

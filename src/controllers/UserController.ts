@@ -3,22 +3,19 @@ import { validate } from "class-validator";
 
 import { User } from "../entities/User";
 import { userRepo } from "../data-source";
+import { accept, findUser } from ".";
+import { API } from "../typings/api";
+import { InternalError } from "../errors/InternalError";
+import { TodoError } from "../errors/TodoError";
+import { AlreadyInUseError } from "../errors/AlreadyInUseError";
 
 class UserController {
-  static getOneById = async (req: Request, res: Response) => {
-    const id = Number.parseInt(req.params.id);
+  static getOneById = accept<API.Request.Id, API.User.PublicUser>(
+    async (data) => [200, (await findUser(data)).asPublic()],
+  );
 
-    const user: User = await userRepo().findOne({ where: { id } });
-
-    if (!user) {
-      return res.status(404).json({ error: "no_such_user" });
-    }
-
-    res.json(user.asPublic());
-  };
-
-  static newUser = async (req: Request, res: Response) => {
-    let { login, email, password } = req.body;
+  static createOne = accept<any, null>(async (data) => {
+    let { login, email, password } = data;
     let user = new User();
     user.login = login;
     user.email = email;
@@ -26,93 +23,71 @@ class UserController {
 
     const errors = await validate(user);
     if (errors.length > 0) {
-      return res.status(400).json({ error: "todo" });
+      throw new TodoError();
     }
 
     user.hashPassword();
 
+    // TODO create convenient functions for that
     const userRepository = userRepo();
     if (await userRepository.findOne({ where: { login } })) {
-      return res.status(409).json({ error: "login_already_in_use" });
+      throw new AlreadyInUseError("login");
     }
 
-    if (await userRepository.findOne({ where: { login } })) {
-      return res.status(409).json({ error: "email_already_in_use" });
+    if (await userRepository.findOne({ where: { email } })) {
+      throw new AlreadyInUseError("email");
     }
 
     try {
       await userRepository.save(user);
     } catch (error) {
       console.error(error);
-      return res.status(500).json({ error: "internal" });
+      throw new InternalError();
     }
 
-    res.sendStatus(201);
-  };
+    return [201, null];
+  })
 
-  static editUser = async (req: Request, res: Response) => {
+  static edit = accept<any, null>(async (data, req, res) => {
     const id = Number.parseInt(req.params.id);
     const { email } = req.body;
 
-    const userRepository = userRepo();
+    const user = await findUser({ id });
 
-    let user: User;
-    {
-      try {
-        user = await userRepository.findOne({ where: { id } });
-      } catch (error) {
-        console.error(error);
-        return res.status(500).json({ error: "internal" });
-      }
-
-      if (!user) {
-        return res.status(404).json({ error: "no_such_user" });
-      }
+    if (user.email === email) {
+      return [204, null];
     }
 
-    if (user.email == email) {
-      return res.sendStatus(204);
-    }
-
-    if (await userRepository.findOne({ where: { email } })) {
-      return res.status(400).json({ error: "email_already_in_use" });
+    if (await userRepo().findOne({ where: { email } })) {
+      throw new AlreadyInUseError("email");
     }
 
     user.email = email;
 
     const errors = await validate(user);
     if (errors.length > 0) {
-      return res.status(400).json({ error: "todo" });
+      // 400
+      throw new TodoError();
     }
 
     try {
-      await userRepository.save(user);
+      await userRepo().save(user);
     } catch (error) {
       console.error(error);
-      return res.status(500).json({ error: "internal" });
+      throw new InternalError();
     }
 
-    res.sendStatus(204);
-  };
+    return [200, null]; // FIXME
+  });
 
-  static deleteUser = async (req: Request, res: Response) => {
+  static deleteUser = accept<any, null>(async (data, req, res) => {
     const id = Number.parseInt(req.params.id);
 
-    const userRepository = userRepo();
-    let user: User;
-    try {
-      user = await userRepository.findOne({ where: { id } });
-      if (!user) {
-        return res.status(404).json({ error: "no_such_user" });
-      }
-      await userRepository.delete(id);
-    } catch (error) {
-      console.error(error);
-      return res.sendStatus(500);
-    }
+    const user = await findUser({ id });
+    await userRepo().delete(user.id); // todo more convenient function
 
-    res.sendStatus(204);
-  };
+    return [204, null];
+  });
 };
 
 export default UserController;

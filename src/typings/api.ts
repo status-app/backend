@@ -1,7 +1,6 @@
 import { Length, Matches } from "class-validator";
-import { sealed } from "../util/sealed.dec";
 
-export declare namespace API {
+export namespace API {
   export const EMAIL_REGEX = "([!#-'*+/-9=?A-Z^-~-]+(\.[!#-'*+/-9=?A-Z^-~-]+)*|\"\(\[\]!#-[^-~ \t]|(\\[\t -~]))+\")@([!#-'*+/-9=?A-Z^-~-]+(\.[!#-'*+/-9=?A-Z^-~-]+)*|\[[\t -Z^-~]*])";
 
   export const LOGIN_MIN_LEN = 3;
@@ -13,10 +12,12 @@ export declare namespace API {
   export const EMAIL_MIN_LEN = 6;
   export const EMAIL_MAX_LEN = 128;
 
-  export type Error = any; // TODO
+  export class Error {
+    code: number;
+    message: string;
+  }
 
   export namespace User {
-    @sealed(PublicUser, RestrictedUser, PrivateUser, SelfUser, DBUser)
     export class BaseUser {
       id: number;
 
@@ -61,6 +62,10 @@ export declare namespace API {
 
       @Length(PASSWORD_MIN_LEN, PASSWORD_MAX_LEN)
       newPassword: string;
+    }
+
+    export class Id {
+      id: number;
     }
   }
 
