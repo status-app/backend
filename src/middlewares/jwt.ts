@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import * as jwt from "jsonwebtoken";
 import config from "../config";
 import { AlreadyLoggedInError } from "../errors/AlreadyLoggedInError";
+import { NotAuthenticatedError } from "../errors/NotAuthenticatedError";
 
 export const checkJwt = (req: Request, res: Response, next: NextFunction) => {
   const token = req.headers["auth"] as string;
@@ -11,7 +12,7 @@ export const checkJwt = (req: Request, res: Response, next: NextFunction) => {
     jwtPayload = jwt.verify(token, config.jwtSecret) as any;
     res.locals.jwtPayload = jwtPayload;
   } catch (error) {
-    return res.status(401).json({ error: "auth" });
+    throw new NotAuthenticatedError();
   }
 
   const { uid, login } = jwtPayload;
