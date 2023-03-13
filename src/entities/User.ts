@@ -10,8 +10,6 @@ import { Length, Matches } from "class-validator";
 import * as bcrypt from "bcryptjs";
 import { API } from "../typings/api";
 
-console.log(API)
-
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
