@@ -1,5 +1,5 @@
 import { validate as validateClass, ValidationError } from "class-validator";
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { FindOptionsWhere } from "typeorm";
 import { userRepo } from "../data-source";
 import { User } from "../entities/User";
@@ -10,8 +10,7 @@ import { API } from "../typings/api";
 
 export const validate = async <T extends object>(t: T): Promise<T> => {
   const errors: ValidationError[] = await validateClass(t);
-  if (errors) {
-    // TODO
+  if (errors.length) {
     throw new TodoError();
   }
   return t;
@@ -19,9 +18,13 @@ export const validate = async <T extends object>(t: T): Promise<T> => {
 
 export const accept = <T extends API.Request, R>(
   fun: (data: T, req: Request, res: Response) => Promise<[number, R | API.Error]>
-) => (async (req: Request, res: Response): Promise<any> => {
-  const [status, resData] = await fun(await validate(req.body as T), req, res);
-  res.status(status).json(resData);
+) => (async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+  try {
+    const [status, resData] = await fun(await validate(req.body as T), req, res);
+    res.status(status).json(resData);
+  } catch (ex) {
+    next(ex);
+  }
 });
 
 export const findUser = async (where: FindOptionsWhere<User>, password: string = null) => {

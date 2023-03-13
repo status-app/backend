@@ -31,6 +31,7 @@
       "@types/jsonwebtoken": "^9.0.1",
       "bcryptjs": "^2.4.3",
       "body-parser": "^1.20.2",
+      "chalk": "4",
       "class-validator": "^0.14.0",
       "cors": "^2.8.5",
       "dotenv": "^16.0.3",
@@ -38,6 +39,7 @@
       "helmet": "^6.0.1",
       "jsonwebtoken": "^9.0.0",
       "reflect-metadata": "^0.1.13",
+      "short-uuid": "^4.2.2",
       "sqlite3": "^5.1.4",
       "ts-node-dev": "^2.0.0",
       "typeorm": "0.3.12"

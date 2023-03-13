@@ -1,41 +1,42 @@
 import "reflect-metadata";
 
+import { load as loadConfig } from "./config";
+loadConfig();
+
 import { Server } from "http";
 import express from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
 import helmet from "helmet";
+import { generate } from "short-uuid";
 
-import { load as loadConfig } from "./config";
 import { AppDataSource } from "./data-source";
-import routes from "./routes";
 import { NotFoundError } from "./errors/NotFoundError";
 import { API } from "./typings/api";
 import { ApiError } from "./errors/ApiError";
-
-loadConfig();
+import { createLogger } from "./logger";
+import routes from "./routes";
 
 const PORT = process.env.PORT || 3000;
+const LOGGER = createLogger();
+
+LOGGER.debug("Initializing data source");
 
 AppDataSource.initialize()
   .then(async (_con) => {
+    LOGGER.debug("Data source initialized, starting");
+
     const app = express();
 
-    // Error handler
-    app.use((
-      err: Error | API.Error,
-      _req: express.Request,
-      res: express.Response,
-      _next: express.NextFunction,
-    ) => {
-      console.error((err as any).stack || err);
-
-      if (!(err instanceof API.Error)) {
-        console.log("the above error was not issued by the api!");
-        err = new ApiError(); // use default error message
-      }
-
-      return res.status((err as API.Error).code).json({ error: err.message });
+    // TODO make that a separate file?
+    app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
+      const id = generate();
+      const start = Date.now();
+      LOGGER.info(`${id}> ${req.method} ${req.path} for [${req.ip}]`);
+      res.on("finish", () => {
+        LOGGER.info(`${id}> Completed in ${Date.now() - start}ms`)
+      });
+      next();
     });
 
     // External middlewares
@@ -47,10 +48,27 @@ AppDataSource.initialize()
     app.use("/", routes);
 
     // 404 catchall
-    app.use((_req, _res) => { throw new NotFoundError() });
+    app.use((_req: express.Request, _res: express.Response) => { throw new NotFoundError() });
+
+    // Error handler
+    app.use((
+      err: Error | API.Error,
+      _req: express.Request,
+      res: express.Response,
+      _next: express.NextFunction,
+    ) => {
+      if (!(err instanceof API.Error)) {
+        LOGGER.error("An unknown error occurred", err);
+        err = new ApiError(); // use default error message
+      } else {
+        LOGGER.debug("An API error has occurred:", err);
+      }
+
+      return res.status((err as API.Error).code).json({ error: err.message });
+    });
 
     const httpServer: Server = app.listen(PORT, () =>
-      console.log(`Live on http://localhost:${(httpServer.address() as any).port}`)
+      LOGGER.info(`Live on http://localhost:${(httpServer.address() as any).port}`)
     );
   })
-  .catch(error => console.log(error));
+  .catch((error) => LOGGER.error(error));

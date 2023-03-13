@@ -8,8 +8,11 @@ import { API } from "../typings/api";
 import { InternalError } from "../errors/InternalError";
 import { TodoError } from "../errors/TodoError";
 import { AlreadyInUseError } from "../errors/AlreadyInUseError";
+import { createLogger } from "../logger";
 
 class UserController {
+  static LOGGER = createLogger("users");
+
   static getOneById = accept<API.Request.Id, API.User.PublicUser>(
     async (data) => [200, (await findUser(data)).asPublic()],
   );
@@ -41,7 +44,7 @@ class UserController {
     try {
       await userRepository.save(user);
     } catch (error) {
-      console.error(error);
+      UserController.LOGGER.error(error);
       throw new InternalError();
     }
 
@@ -72,8 +75,8 @@ class UserController {
 
     try {
       await userRepo().save(user);
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      UserController.LOGGER.error(err);
       throw new InternalError();
     }
 
