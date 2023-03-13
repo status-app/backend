@@ -45,9 +45,9 @@ export namespace API {
     }
   }
 
-  export namespace Request {
-    export interface Request {}
+  export interface Request {}
 
+  export namespace Request {
     export class Credentials implements Request {
       @Length(LOGIN_MIN_LEN, LOGIN_MAX_LEN)
       login: string;
@@ -69,9 +69,9 @@ export namespace API {
     }
   }
 
-  export namespace Response {
-    export interface Response {}
+  export interface Response {}
 
+  export namespace Response {
     export interface LogIn extends Response {
       token: string;
     }
