@@ -7,6 +7,13 @@ import { InvalidError, NoSuchError, TodoError } from "../errors";
 import { API } from "../typings/api";
 import User from "../entities/User";
 
+/**
+ * Validates the given object.
+ *
+ * @param t the object to validate.
+ * @returns the given {@link t}.
+ * @throws a {@link TodoError} if the object could not be validated.
+ */
 export const validate = async <T extends object>(t: T): Promise<T> => {
   const errors: ValidationError[] = await validateClass(t);
   if (errors.length) {
@@ -15,6 +22,13 @@ export const validate = async <T extends object>(t: T): Promise<T> => {
   return t;
 }
 
+/**
+ * Creates an express route receiver conforming the API types.
+ *
+ * @param fun the asynchronous function that handles the route.
+ *            TODO: document types
+ * @returns the newly created Express route receiver.
+ */
 export const accept = <T extends API.Request, S = null, R = S | API.Error>(
   fun: (data: T, req: Request, res: Response) => Promise<[number, R] | number | R>
 ) => (async (req: Request, res: Response, next: NextFunction): Promise<any> => {
@@ -42,6 +56,17 @@ export const accept = <T extends API.Request, S = null, R = S | API.Error>(
   }
 });
 
+/**
+ * Finds a User object from the repository matching the given conditions.
+ *
+ * @param where the condition object.
+ * @param password the potential password to check for.
+ * @returns the found User object.
+ * @throws {@link NoSuchError} if no user matching the given conditions could
+ *         be found.
+ * @throws {@link InvalidError} if the user was found but the given password
+ *         did not match.
+ */
 export const findUser = async (where: FindOptionsWhere<User>, password: string = null) => {
   const user: User = await userRepo().findOne({ where });
   if (!user) {
@@ -55,6 +80,13 @@ export const findUser = async (where: FindOptionsWhere<User>, password: string =
   return user;
 }
 
+/**
+ * An API-fail-safe alternative to the {@link findUser} function.
+ *
+ * @param where the condition object.
+ * @param password the potential password to check for.
+ * @returns the found User object, or null if none was found.
+ */
 export const matchUser = async (where: FindOptionsWhere<User>, password: string = null) => {
   try {
     return findUser(where, password);

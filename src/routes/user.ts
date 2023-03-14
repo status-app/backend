@@ -1,17 +1,30 @@
 import { NextFunction, Request, Response, Router } from "express";
-import UserController from "../controllers/UserController";
+
 import { checkJwt, checkNoJwt } from "../middlewares/jwt";
+import NamedRouter from "./NamedRouter";
+import UserController from "../controllers/UserController";
 
-export default Router()
-  .get("/", [checkJwt, (req: Request, res: Response, next: NextFunction) => {
-    req.params.id = res.locals.jwtPayload.uid;
-    next();
-  }], UserController.get)
+/**
+ * CRUD Router for the User model.
+ */
+export default {
+  name: UserController.NAME,
 
-  .get("/:id([0-9]+)", [checkJwt], UserController.get)
+  router: Router()
+    // Create
+    .post("/", [checkNoJwt], UserController.create)
 
-  .post("/", [checkNoJwt], UserController.create)
+    // Read
+    .get("/", [checkJwt, (req: Request, res: Response, next: NextFunction) => {
+      req.params.id = res.locals.jwtPayload.uid;
+      next();
+    }], UserController.get)
 
-  .patch("/:id([0-9]+)", [checkJwt], UserController.edit) 
+    .get("/:id([0-9]+)", [checkJwt], UserController.get)
 
-// .delete("/:id([0-9]+)", [checkJwt], UserController.deleteUser);
+    // Update
+    .patch("/:id([0-9]+)", [checkJwt], UserController.edit)
+
+    // Delete
+    .delete("/:id([0-9]+)", [checkJwt], UserController.delete)
+} as NamedRouter;

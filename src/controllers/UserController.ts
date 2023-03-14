@@ -6,10 +6,12 @@ import { API } from "../typings/api";
 import User from "../entities/User";
 
 export default class UserController {
-  static LOGGER = createLogger("users");
+  static NAME = "user";
+  static LOGGER = createLogger(UserController.NAME);
 
-  static get = accept<API.Request.Id, API.User.PublicUser>(
-    async (data) => (await findUser(data)).asPublic(),
+  static get = accept<any, API.User.PublicUser>(
+    // TODO accept with req params
+    async (_, req) => (await findUser({ id: Number.parseInt(req.params.id) })).asPublic(),
   );
 
   static create = accept<any>(async (data) => {
@@ -34,7 +36,7 @@ export default class UserController {
     return 201;
   })
 
-  static edit = accept<any, null>(async (data, req, res) => {
+  static edit = accept<any>(async (data, req, res) => {
     const id = Number.parseInt(req.params.id);
     const { email } = req.body;
 

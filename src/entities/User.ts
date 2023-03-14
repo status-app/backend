@@ -12,6 +12,8 @@ import { API } from "../typings/api";
 
 @Entity()
 export default class User {
+  private static passwordRegex = new RegExp(API.PASSWORD_REGEX);
+
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -25,7 +27,6 @@ export default class User {
   email: string;
 
   @Column()
-  @Length(API.PASSWORD_MIN_LEN, API.PASSWORD_MAX_LEN)
   password: string;
 
   @Column()
@@ -36,11 +37,27 @@ export default class User {
   @UpdateDateColumn()
   updatedAt: Date;
 
+  static isPasswordValid(unencryptedPassword: string | undefined) {
+    return unencryptedPassword && this.passwordRegex.test(unencryptedPassword);
+  }
+
+  /**
+   * Hashes this User's password.
+   */
   async hashPassword() {
     this.password = await bcrypt.hash(this.password, 8);
   }
 
+  /**
+   * Checks if the given password matches with this user's encrypted password.
+   * @param unencryptedPassword 
+   * @returns 
+   */
   async passwordMatches(unencryptedPassword: string): Promise<boolean> {
+    if (!User.isPasswordValid(unencryptedPassword)) {
+      return false;
+    }
+
     return bcrypt.compare(unencryptedPassword, this.password);
   }
 

@@ -2,11 +2,15 @@ import jwt from "jsonwebtoken";
 
 import { accept, findUser, validate } from ".";
 import { userRepo } from "../data-source";
+import { createLogger } from "../logger";
 import { API } from "../typings/api";
 import User from "../entities/User";
 import config from "../config";
 
 export default class AuthController {
+  static NAME = "auth";
+  static LOGGER = createLogger(AuthController.NAME);
+
   static login = accept<API.Request.Credentials, API.Response.LogIn>(async (creds, req, res) => {
     const user: User = await findUser({ login: creds.login }, creds.password);  // Will fail on wrong user or password
 
