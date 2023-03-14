@@ -11,9 +11,8 @@ import helmet from "helmet";
 import { generate } from "short-uuid";
 
 import { AppDataSource } from "./data-source";
-import { NotFoundError } from "./errors/NotFoundError";
+import { NotFoundError, defaultError } from "./errors";
 import { API } from "./typings/api";
-import { ApiError } from "./errors/ApiError";
 import { createLogger } from "./logger";
 import routes from "./routes";
 
@@ -59,7 +58,7 @@ AppDataSource.initialize()
     ) => {
       if (!(err instanceof API.Error)) {
         LOGGER.error("An unknown error occurred", err);
-        err = new ApiError(); // use default error message
+        err = defaultError; // use default error message
       } else {
         LOGGER.debug("An API error has occurred:", err);
       }

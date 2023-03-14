@@ -1,54 +1,37 @@
-import { Request, Response } from "express";
-import { validate } from "class-validator";
-
-import { User } from "../entities/User";
+import { accept, findUser, matchUser, validate } from ".";
 import { userRepo } from "../data-source";
-import { accept, findUser } from ".";
-import { API } from "../typings/api";
-import { InternalError } from "../errors/InternalError";
-import { TodoError } from "../errors/TodoError";
-import { AlreadyInUseError } from "../errors/AlreadyInUseError";
+import { InternalError, AlreadyInUseError } from "../errors";
 import { createLogger } from "../logger";
+import { API } from "../typings/api";
+import User from "../entities/User";
 
-class UserController {
+export default class UserController {
   static LOGGER = createLogger("users");
 
-  static getOneById = accept<API.Request.Id, API.User.PublicUser>(
-    async (data) => [200, (await findUser(data)).asPublic()],
+  static get = accept<API.Request.Id, API.User.PublicUser>(
+    async (data) => (await findUser(data)).asPublic(),
   );
 
-  static createOne = accept<any, null>(async (data) => {
+  static create = accept<any>(async (data) => {
     let { login, email, password } = data;
+
     let user = new User();
     user.login = login;
     user.email = email;
     user.password = password;
+    await validate(user);
 
-    const errors = await validate(user);
-    if (errors.length > 0) {
-      throw new TodoError();
-    }
-
-    user.hashPassword();
-
-    // TODO create convenient functions for that
-    const userRepository = userRepo();
-    if (await userRepository.findOne({ where: { login } })) {
+    if (await matchUser({ login })) {
       throw new AlreadyInUseError("login");
     }
 
-    if (await userRepository.findOne({ where: { email } })) {
+    if (await matchUser({ email })) {
       throw new AlreadyInUseError("email");
     }
 
-    try {
-      await userRepository.save(user);
-    } catch (error) {
-      UserController.LOGGER.error(error);
-      throw new InternalError();
-    }
-
-    return [201, null];
+    await user.hashPassword();
+    await userRepo().save(user);
+    return 201;
   })
 
   static edit = accept<any, null>(async (data, req, res) => {
@@ -58,20 +41,16 @@ class UserController {
     const user = await findUser({ id });
 
     if (user.email === email) {
-      return [204, null];
+      return null;
     }
 
-    if (await userRepo().findOne({ where: { email } })) {
+    if (await matchUser({ email })) {
       throw new AlreadyInUseError("email");
     }
 
     user.email = email;
 
-    const errors = await validate(user);
-    if (errors.length > 0) {
-      // 400
-      throw new TodoError();
-    }
+    await validate(user);
 
     try {
       await userRepo().save(user);
@@ -83,14 +62,8 @@ class UserController {
     return [200, null]; // FIXME
   });
 
-  static deleteUser = accept<any, null>(async (data, req, res) => {
-    const id = Number.parseInt(req.params.id);
-
-    const user = await findUser({ id });
-    await userRepo().delete(user.id); // todo more convenient function
-
-    return [204, null];
+  static delete = accept<API.Request.Id, null>(async (data, _req, _res) => {
+    await userRepo().delete((await findUser(data)).id);
+    return null;
   });
 };
-
-export default UserController;

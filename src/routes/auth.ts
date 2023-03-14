@@ -1,6 +1,7 @@
 import { Router } from "express";
-import AuthController from "../controllers/AuthController";
+
 import { checkJwt } from "../middlewares/jwt";
+import AuthController from "../controllers/AuthController";
 
 export default Router()
   .post("/login", AuthController.login)

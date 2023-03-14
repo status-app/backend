@@ -1,10 +1,8 @@
+import { bold, cyan, gray, green, magenta, red, yellow } from "chalk";
 import { createWriteStream, existsSync, mkdirSync } from "fs";
 import { inspect } from "util";
 
-import { bold, cyan, gray, green, magenta, red, yellow } from "chalk";
-
-export const LEVEL = process.env.DEBUG ? 4 : parseInt(process.env.LOG_LEVEL || "0", 10);
-export const IS_DEBUG = LEVEL >= 1;
+import config from "./config";
 
 const METHOD_COLORS = {
   debug: gray,
@@ -47,7 +45,7 @@ export function createLogger(
   opts?: { childNames?: string[]; debugEnabled?: boolean }
 ) {
   const knownChildNames = opts?.childNames ?? [];
-  const debugEnabled = opts?.debugEnabled ?? IS_DEBUG;
+  const debugEnabled = opts?.debugEnabled ?? config.debugEnabled;
 
   // If a logger has a blank name and has children, take the first child name as the main name.
   let effectiveName = name;

@@ -1,14 +1,12 @@
-import * as jwt from "jsonwebtoken";
+import jwt from "jsonwebtoken";
+
+import { accept, findUser, validate } from ".";
 import { userRepo } from "../data-source";
-import { validate } from "class-validator";
-
-import { User } from "../entities/User";
-import config from "../config";
 import { API } from "../typings/api";
-import { accept, findUser } from ".";
-import { TodoError } from "../errors/TodoError";
+import User from "../entities/User";
+import config from "../config";
 
-class AuthController {
+export default class AuthController {
   static login = accept<API.Request.Credentials, API.Response.LogIn>(async (creds, req, res) => {
     const user: User = await findUser({ login: creds.login }, creds.password);  // Will fail on wrong user or password
 
@@ -21,36 +19,24 @@ class AuthController {
     // TODO send current user instead? + token in cookies?
     // https://dev.to/cotter/localstorage-vs-cookies-all-you-need-to-know-about-storing-jwt-tokens-securely-in-the-front-end-15id
 
-    return [200, { token }];
+    return { token };
   });
 
-  static changePassword = accept<API.Request.PasswordChange, API.Response.LogIn>(async (data, req, res) => {
+  static changePassword = accept<API.Request.PasswordChange>(async (data, req, res) => {
     // TODO invalidate previous tokens
-  
+
     const id = res.locals.jwtPayload.userId;
 
-    const { oldPassword, newPassword } = req.body;
-    if (!oldPassword || !newPassword) {
-      // 400
-      throw new TodoError();
+    const user = await findUser({ id }, data.currentPassword);
+
+    // Do not edit if passwords match
+    if (!user.passwordMatches(data.newPassword)) {
+      user.password = data.newPassword;
+      await validate(user); // Will throw incase there is a validation error
+      await user.hashPassword();
+      await userRepo().save(user);
     }
 
-    const user = await findUser({ id }, oldPassword);
-    if (user.passwordMatches(newPassword)) {
-      // Do not edit if passwords match
-      return [204, null];
-    }
-
-    user.password = newPassword;
-    const errors = await validate(user);
-    if (errors.length > 0) {
-      // 400
-      throw new TodoError();
-    }
-    
-    user.hashPassword();
-    userRepo().save(user);
+    return null;
   });
 }
-
-export default AuthController;

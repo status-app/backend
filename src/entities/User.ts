@@ -5,13 +5,13 @@ import {
   CreateDateColumn,
   UpdateDateColumn
 } from "typeorm";
-
 import { Length, Matches } from "class-validator";
-import * as bcrypt from "bcryptjs";
+import bcrypt from "bcryptjs";
+
 import { API } from "../typings/api";
 
 @Entity()
-export class User {
+export default class User {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -36,8 +36,8 @@ export class User {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  hashPassword() {
-    this.password = bcrypt.hashSync(this.password, 8);
+  async hashPassword() {
+    this.password = await bcrypt.hash(this.password, 8);
   }
 
   async passwordMatches(unencryptedPassword: string): Promise<boolean> {

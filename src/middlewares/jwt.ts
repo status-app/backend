@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from "express";
-import * as jwt from "jsonwebtoken";
+import jwt from "jsonwebtoken";
+
+import { AlreadyLoggedInError, NotAuthenticatedError } from "../errors";
 import config from "../config";
-import { AlreadyLoggedInError } from "../errors/AlreadyLoggedInError";
-import { NotAuthenticatedError } from "../errors/NotAuthenticatedError";
 
 export const checkJwt = (req: Request, res: Response, next: NextFunction) => {
   const token = req.headers["auth"] as string;
