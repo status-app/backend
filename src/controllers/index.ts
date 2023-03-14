@@ -59,6 +59,11 @@ export const matchUser = async (where: FindOptionsWhere<User>, password: string 
   try {
     return findUser(where, password);
   } catch (ex) {
-    return null;
+    if (ex instanceof API.Error) {
+      return null;
+    }
+    
+    // Throw the exception if it isn't known (IO or DB-related)
+    throw ex;
   }
 }
