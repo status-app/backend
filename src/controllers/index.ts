@@ -19,9 +19,10 @@ export const accept = <T extends API.Request, S = null, R = S | API.Error>(
   fun: (data: T, req: Request, res: Response) => Promise<[number, R] | number | R>
 ) => (async (req: Request, res: Response, next: NextFunction): Promise<any> => {
   try {
-    const result = await fun(await validate(req.body as T), req, res);
+    const result = await fun(await validate(req.body as T), req, res) || null;
 
-    let code: number = 200, data: R | null = null;
+    let code: number = 200
+    let data: R | null = null;
     {
       if (result === null) {
         code = 204;
