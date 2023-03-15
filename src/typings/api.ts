@@ -56,6 +56,7 @@ export namespace API {
       @Matches(LOGIN_REGEX)
       login: string;
 
+      @Length(PASSWORD_MIN_LEN, PASSWORD_MAX_LEN)
       @Matches(PASSWORD_REGEX)
       password: string;
     }
