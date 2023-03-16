@@ -2,7 +2,7 @@ import "reflect-metadata";
 import "./config";
 
 import { Server } from "http";
-import express from "express";
+import express, { NextFunction, Request, Response } from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
 import helmet from "helmet";
@@ -28,7 +28,7 @@ AppDataSource.initialize()
     const app = express();
 
     // TODO make that a separate file?
-    app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
+    app.use((req: Request, res: Response, next: NextFunction) => {
       const id = generate();
       const start = Date.now();
       LOGGER.info(`${id}> ${req.method} ${req.path} for [${req.ip}]`);
@@ -47,16 +47,16 @@ AppDataSource.initialize()
     app.use("/", routes);
 
     // 404 catchall
-    app.use((_req: express.Request, _res: express.Response) => {
+    app.use((_req: Request, _res: Response) => {
       throw new NotFoundError()
     });
 
     // Error handler
     app.use((
       errorObj: Error | ErrorObject,
-      _req: express.Request,
-      res: express.Response,
-      _next: express.NextFunction,
+      _req: Request,
+      res: Response,
+      _next: NextFunction,
     ) => {
       let logger: Logger = LOGGER;
       let err: any = errorObj;
