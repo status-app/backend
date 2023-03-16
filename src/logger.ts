@@ -163,7 +163,7 @@ function formatLog(
 
   // Split it so that we only get the time without the date.
   const date = new Date();
-  const time = `${date.toTimeString().split(" ")[0]}.${date.getMilliseconds()}`;
+  const time = `${date.toTimeString().split(" ")[0]}.${(`00${date.getMilliseconds()}`).slice(-3)}`;
 
   return `${bold(magenta(time))} ${effectiveName}${opts.colorizer(opts.method)}`;
 }

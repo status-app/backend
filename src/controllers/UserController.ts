@@ -1,20 +1,40 @@
 import { accept, findUser, matchUser, validate } from ".";
 import { userRepo } from "../data-source";
-import { InternalError, AlreadyInUseError } from "../errors";
+import { InternalError, AlreadyInUseError, MissingBodyError, ForbiddenError, NotModifiedError } from "../errors";
 import { createLogger } from "../logger";
 import { API } from "../typings/api";
 import User from "../entities/User";
 
+/**
+ * Controller in charge of CRUD-operations related to the User entity.
+ */
 export default class UserController {
   static NAME = "user";
   static LOGGER = createLogger(UserController.NAME);
 
-  static get = accept<any, API.User.PublicUser>(
+  /**
+   * Gets a single user. Takes an optional {@link API.Request.Id} body,
+   * defaulting to the user's id if none is given based off of the auth
+   * token.
+   *
+   * @returns the found user on success.
+   */
+  static get = accept<Partial<API.Request.Id>, API.User.PublicUser>(
+    this,
     // TODO accept with req params
-    async (_, req) => (await findUser({ id: Number.parseInt(req.params.id) })).asPublic(),
+    async (_, req, res) => (
+      await findUser({
+        id: Number.parseInt(req.params.id || res.locals.jwtPayload.uid || "-1")
+      })
+    ).asPublic(),
   );
 
-  static create = accept<any>(async (data) => {
+  /**
+   * Creates a user. Takes a {@link API.Request.User.Create} body.
+   *
+   * @returns `null` on success.
+   */
+  static create = accept<API.Request.User.Create>(this, async (data) => {
     let { login, email, password } = data;
 
     let user = new User();
@@ -36,14 +56,24 @@ export default class UserController {
     return 201;
   })
 
-  static edit = accept<any>(async (data, req, res) => {
+  /**
+   * Edits a user. Takes a partial {@link API.Request.User.Create} body.
+   *
+   * @returns `null` on success.
+   */
+  static edit = accept<Partial<API.User.RestrictedUser>>(this, async (data, req, _res) => {
     const id = Number.parseInt(req.params.id);
-    const { email } = req.body;
+
+    if (!Object.keys(data).length) {
+      throw new MissingBodyError();
+    }
+
+    const { email } = data;
 
     const user = await findUser({ id });
 
     if (user.email === email) {
-      return null;
+      throw new NotModifiedError();
     }
 
     if (await matchUser({ email })) {
@@ -51,21 +81,25 @@ export default class UserController {
     }
 
     user.email = email;
-
     await validate(user);
 
-    try {
-      await userRepo().save(user);
-    } catch (err) {
-      UserController.LOGGER.error(err);
-      throw new InternalError();
-    }
+    await userRepo().save(user);
 
-    return [200, null]; // FIXME
+    return null;
   });
 
-  static delete = accept<API.Request.Id, null>(async (data, _req, _res) => {
-    await userRepo().delete((await findUser(data)).id);
+  /**
+   * Deletes the session user. Takes no body, uses the session user id.
+   * This will not work if the user is the system user (id = 1).
+   *
+   * @returns `null` on success.
+   */
+  static delete = accept<null>(this, async (_, _req, res) => {
+    const id = (await findUser({ id: res.locals.jwtPayload?.uid || -1 })).id;
+    if (id === 1) {
+      throw new ForbiddenError();
+    }
+    await userRepo().delete({ id });
     return null;
   });
 };

@@ -1,7 +1,5 @@
 import "reflect-metadata";
-
-import { load as loadConfig } from "./config";
-loadConfig();
+import "./config";
 
 import { Server } from "http";
 import express from "express";
@@ -13,13 +11,15 @@ import { generate } from "short-uuid";
 import { AppDataSource } from "./data-source";
 import { NotFoundError, defaultError } from "./errors";
 import { API } from "./typings/api";
-import { createLogger } from "./logger";
+import { createLogger, Logger } from "./logger";
 import routes from "./routes";
 
 const PORT = process.env.PORT || 3000;
 const LOGGER = createLogger();
 
 LOGGER.debug("Initializing data source");
+
+type ErrorObject = { err: API.Error, controller: { LOGGER: Logger } };
 
 AppDataSource.initialize()
   .then(async (_con) => {
@@ -47,20 +47,30 @@ AppDataSource.initialize()
     app.use("/", routes);
 
     // 404 catchall
-    app.use((_req: express.Request, _res: express.Response) => { throw new NotFoundError() });
+    app.use((_req: express.Request, _res: express.Response) => {
+      throw new NotFoundError()
+    });
 
     // Error handler
     app.use((
-      err: Error | API.Error,
+      errorObj: Error | ErrorObject,
       _req: express.Request,
       res: express.Response,
       _next: express.NextFunction,
     ) => {
-      if (!(err instanceof API.Error)) {
-        LOGGER.error("An unknown error occurred", err);
-        err = defaultError; // use default error message
+      let logger: Logger = LOGGER;
+      let err: any = errorObj;
+      if (!(err instanceof Error)) {
+        const obj = errorObj as ErrorObject;
+        logger = obj.controller.LOGGER;
+        err = obj.err;
+      }
+
+      if (err instanceof API.Error) {
+        logger.debug("An API error occurred:", err);
       } else {
-        LOGGER.debug("An API error has occurred:", err);
+        logger.error("oh noes!", err);
+        err = defaultError; // use default error message
       }
 
       return res.status((err as API.Error).code).json({ error: err.message });

@@ -61,14 +61,23 @@ export default class User {
     return bcrypt.compare(unencryptedPassword, this.password);
   }
 
+  /**
+   * @returns this {@link User} as a {@link API.User.PublicUser}.
+   */
   asPublic(): API.User.PublicUser {
     return { id: this.id, login: this.login };
   }
 
+  /**
+   * @returns this {@link User} as a {@link API.User.RestrictedUser}.
+   */
   asRestricted(): API.User.RestrictedUser {
     return { ...this.asPublic(), email: this.email };
   }
 
+  /**
+   * @returns this {@link User} as a {@link API.User.SelfUser}.
+   */
   asSelf(): API.User.SelfUser {
     return { ...this.asRestricted(), createdAt: this.createdAt };
   }

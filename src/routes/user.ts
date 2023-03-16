@@ -5,7 +5,7 @@ import NamedRouter from "./NamedRouter";
 import UserController from "../controllers/UserController";
 
 /**
- * CRUD Router for the User model.
+ * CRUD Router for the User entity.
  */
 export default {
   name: UserController.NAME,
@@ -15,11 +15,6 @@ export default {
     .post("/", [checkNoJwt], UserController.create)
 
     // Read
-    .get("/", [checkJwt, (req: Request, res: Response, next: NextFunction) => {
-      req.params.id = res.locals.jwtPayload.uid;
-      next();
-    }], UserController.get)
-
     .get("/:id([0-9]+)", [checkJwt], UserController.get)
 
     // Update

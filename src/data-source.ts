@@ -13,4 +13,8 @@ export const AppDataSource = new DataSource({
   migrations: [ "src/migrations/**/*.ts" ],
 });
 
-export const userRepo = (): Repository<User> => AppDataSource.getRepository(User);
+/**
+ * @returns the user repository.
+ */
+export const userRepo = (): Repository<User> =>
+  AppDataSource.getRepository(User);

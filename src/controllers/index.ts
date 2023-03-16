@@ -6,6 +6,7 @@ import { userRepo } from "../data-source";
 import { InvalidError, NoSuchError, TodoError } from "../errors";
 import { API } from "../typings/api";
 import User from "../entities/User";
+import { Logger } from "../logger";
 
 /**
  * Validates the given object.
@@ -30,12 +31,13 @@ export const validate = async <T extends object>(t: T): Promise<T> => {
  * @returns the newly created Express route receiver.
  */
 export const accept = <T extends API.Request, S = null, R = S | API.Error>(
+  controller: { LOGGER: Logger },
   fun: (data: T, req: Request, res: Response) => Promise<[number, R] | number | R>
 ) => (async (req: Request, res: Response, next: NextFunction): Promise<any> => {
   try {
     const result = await fun(await validate(req.body as T), req, res) || null;
 
-    let code: number = 200
+    let code: number = 200;
     let data: R | null = null;
     {
       if (result === null) {
@@ -51,8 +53,8 @@ export const accept = <T extends API.Request, S = null, R = S | API.Error>(
     }
 
     res.status(code).json(data);
-  } catch (ex) {
-    next(ex);
+  } catch (err) {
+    next({ controller, err, });
   }
 });
 
@@ -68,8 +70,12 @@ export const accept = <T extends API.Request, S = null, R = S | API.Error>(
  *         did not match.
  */
 export const findUser = async (where: FindOptionsWhere<User>, password: string = null) => {
-  const user: User = await userRepo().findOne({ where });
-  if (!user) {
+  let user: User;
+  if (
+    where.id === 0 ||
+    (where.id && where.id < 0) ||
+    !(user = await userRepo().findOne({ where }))
+  ) {
     throw new NoSuchError("user");
   }
 

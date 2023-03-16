@@ -4,6 +4,13 @@ import jwt from "jsonwebtoken";
 import { AlreadyLoggedInError, NotAuthenticatedError } from "../errors";
 import config from "../config";
 
+/**
+ * Checks for JWT presence and validity in the request.
+ *
+ * @param req The {@link Request} object.
+ * @param res The {@link Response} object.
+ * @param next The {@link NextFunction} object.
+ */
 export const checkJwt = (req: Request, res: Response, next: NextFunction) => {
   const token = req.headers["auth"] as string;
 
@@ -26,6 +33,13 @@ export const checkJwt = (req: Request, res: Response, next: NextFunction) => {
   next();
 };
 
+/**
+ * Checks for JWT absence in the request.
+ *
+ * @param req The {@link Request} object.
+ * @param res The {@link Response} object.
+ * @param next The {@link NextFunction} object.
+ */
 export const checkNoJwt = (req: Request, res: Response, next: NextFunction) => {
   const token = req.headers["auth"] as string;
 

@@ -7,11 +7,19 @@ import { API } from "../typings/api";
 import User from "../entities/User";
 import config from "../config";
 
+/**
+ * Controller in charge of authentication.
+ */
 export default class AuthController {
   static NAME = "auth";
   static LOGGER = createLogger(AuthController.NAME);
 
-  static login = accept<API.Request.Credentials, API.Response.LogIn>(async (creds, req, res) => {
+  /**
+   * Logs the user in. Takes a {@link API.Request.Auth.Credentials} body.
+   *
+   * @returns a {@link API.Response.Auth.LogIn} on success.
+   */
+  static login = accept<API.Request.Auth.Credentials, API.Response.Auth.LogIn>(this, async (creds, req, res) => {
     const user: User = await findUser({ login: creds.login }, creds.password);  // Will fail on wrong user or password
 
     const token = jwt.sign(
@@ -26,9 +34,13 @@ export default class AuthController {
     return { token };
   });
 
-  static changePassword = accept<API.Request.PasswordChange>(async (data, req, res) => {
+  /**
+   * Changes the user's password. Takes a {@link API.Request.Auth.PasswordChange} body.
+   *
+   * @returns nothing on success.
+   */
+  static changePassword = accept<API.Request.Auth.PasswordChange>(this, async (data, req, res) => {
     // TODO invalidate previous tokens
-
     const id = res.locals.jwtPayload.userId;
 
     const user = await findUser({ id }, data.currentPassword);

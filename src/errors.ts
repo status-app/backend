@@ -5,7 +5,7 @@ class ApiError extends API.Error implements Error {
 
   constructor(readonly code: number = 500, readonly message: string = "unknown") {
     super();
-    this.name = (<any>this).constructor.name; // fixme lol
+    this.name = (this as any).constructor.name; // fixme lol
   }
 }
 
@@ -35,6 +35,12 @@ export class InvalidError extends ApiError {
   }
 }
 
+export class MissingBodyError extends ApiError {
+  constructor() {
+    super(400, "missing_body")
+  }
+}
+
 export class NoSuchError extends ApiError {
   constructor(readonly what: string) {
     super(404, `no_such_${what}`);
@@ -44,6 +50,18 @@ export class NoSuchError extends ApiError {
 export class NotAuthenticatedError extends ApiError {
   constructor(message?: string) {
     super(401, message || "auth");
+  }
+}
+
+export class ForbiddenError extends ApiError {
+  constructor(message?: string) {
+    super(403, message || "forbidden");
+  }
+}
+
+export class NotModifiedError extends ApiError {
+  constructor(message?: string) {
+    super(304, message || "not_modified");
   }
 }
 

@@ -51,36 +51,48 @@ export namespace API {
   export interface Request {}
 
   export namespace Request {
-    export class Credentials implements Request {
-      @Length(LOGIN_MIN_LEN, LOGIN_MAX_LEN)
-      @Matches(LOGIN_REGEX)
-      login: string;
-
-      @Length(PASSWORD_MIN_LEN, PASSWORD_MAX_LEN)
-      @Matches(PASSWORD_REGEX)
-      password: string;
-    }
-
-    export class PasswordChange implements Request {
-      @Length(PASSWORD_MIN_LEN, PASSWORD_MAX_LEN)
-      @Matches(PASSWORD_REGEX)
-      currentPassword: string;
-
-      @Length(PASSWORD_MIN_LEN, PASSWORD_MAX_LEN)
-      @Matches(PASSWORD_REGEX)
-      newPassword: string;
-    }
-
     export class Id {
       id: number;
+    }
+
+    export namespace Auth {
+      export class Credentials implements Request {
+        @Length(LOGIN_MIN_LEN, LOGIN_MAX_LEN)
+        @Matches(LOGIN_REGEX)
+        login: string;
+
+        @Length(PASSWORD_MIN_LEN, PASSWORD_MAX_LEN)
+        @Matches(PASSWORD_REGEX)
+        password: string;
+      }
+  
+      export class PasswordChange implements Request {
+        @Length(PASSWORD_MIN_LEN, PASSWORD_MAX_LEN)
+        @Matches(PASSWORD_REGEX)
+        currentPassword: string;
+  
+        @Length(PASSWORD_MIN_LEN, PASSWORD_MAX_LEN)
+        @Matches(PASSWORD_REGEX)
+        newPassword: string;
+      }
+    }
+
+    export namespace User {
+      export class Create extends API.User.RestrictedUser implements Request {
+        @Length(PASSWORD_MIN_LEN, PASSWORD_MAX_LEN)
+        @Matches(PASSWORD_REGEX)
+        password: string;
+      }
     }
   }
 
   export interface Response {}
 
   export namespace Response {
-    export interface LogIn extends Response {
-      token: string;
+    export namespace Auth {
+      export interface LogIn extends Response {
+        token: string;
+      }
     }
   }
 }
