@@ -1,3 +1,7 @@
+// Originally written for Koppa: https://github.com/usekoppa/bot/blob/main/lib/utils/logger.ts.
+// All credits go to https://github.com/zorbyte, https://github.com/lambdagg.
+// Initially licensed under MIT.
+
 import { bold, cyan, gray, green, magenta, red, yellow } from "chalk";
 import { createWriteStream, existsSync, mkdirSync } from "fs";
 import { inspect } from "util";
