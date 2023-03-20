@@ -19,7 +19,7 @@ export default class AuthController {
    *
    * @returns a {@link API.Response.Auth.LogIn} on success.
    */
-  static login = accept<API.Request.Auth.Credentials, API.Response.Auth.LogIn>(this, async (creds, req, res) => {
+  static login = accept<API.Request.Auth.Credentials, API.Response.Auth.LogIn>(this, async (creds) => {
     const user: User = await findUser({ login: creds.login }, creds.password);  // Will fail on wrong user or password
 
     const token = jwt.sign(
@@ -39,7 +39,7 @@ export default class AuthController {
    *
    * @returns nothing on success.
    */
-  static changePassword = accept<API.Request.Auth.PasswordChange>(this, async (data, req, res) => {
+  static changePassword = accept<API.Request.Auth.PasswordChange>(this, async (data, _req, res) => {
     // TODO invalidate previous tokens
     const id = res.locals.jwtPayload.userId;
 

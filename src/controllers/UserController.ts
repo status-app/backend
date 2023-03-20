@@ -13,18 +13,17 @@ export default class UserController {
   static LOGGER = createLogger(UserController.NAME);
 
   /**
-   * Gets a single user. Takes an optional {@link API.Request.Id} body,
-   * defaulting to the user's id if none is given based off of the auth
-   * token.
+   * Gets a single user. Takes an optional `id` param, defaulting to the user's
+   * id if none is given based off of the auth token.
    *
    * @returns the found user on success.
    */
-  static get = accept<Partial<API.Request.Id>, API.User.PublicUser>(
+  static get = accept<null, API.User.PublicUser>(
     this,
     // TODO accept with req params
     async (_, req, res) => (
       await findUser({
-        id: Number.parseInt(req.params.id || res.locals.jwtPayload.uid || "-1")
+        id: Number.parseInt(req.params.id || res.locals.jwtPayload?.uid || "-1")
       })
     ).asPublic(),
   );
@@ -57,18 +56,19 @@ export default class UserController {
   })
 
   /**
-   * Edits a user. Takes a partial {@link API.Request.User.Create} body.
+   * Edits a user. Takes an `id` query param and a partial
+   * {@link API.User.RestrictedUser} body.
    *
    * @returns nothing on success.
    */
-  static edit = accept<Partial<API.User.RestrictedUser>>(this, async (data, req, _res) => {
+  static edit = accept<Partial<API.User.RestrictedUser>>(this, async (partialUser, req, _res) => {
     const id = Number.parseInt(req.params.id);
 
-    if (!Object.keys(data).length) {
+    if (!Object.keys(partialUser).length) {
       throw new MissingBodyError();
     }
 
-    const { email } = data;
+    const { email } = partialUser;
 
     const user = await findUser({ id });
 

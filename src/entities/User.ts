@@ -10,18 +10,18 @@ import Identifiable from "./mixins/Identifiable";
 
 @Entity()
 export default class User extends Mixin(Identifiable, DateTimed) {
-  private static passwordRegex = new RegExp(API.PASSWORD_REGEX);
+  private static passwordRegex = new RegExp(API.User.PASSWORD_REGEX);
 
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  @Length(API.LOGIN_MIN_LEN, API.LOGIN_MAX_LEN)
+  @Column({ length: API.User.LOGIN_MAX_LEN })
+  @Length(API.User.LOGIN_MIN_LEN, API.User.LOGIN_MAX_LEN)
   login: string;
 
-  @Column()
-  @Matches(API.EMAIL_REGEX)
-  @Length(API.EMAIL_MIN_LEN, API.EMAIL_MAX_LEN)
+  @Column({ length: API.User.EMAIL_MAX_LEN })
+  @Matches(API.User.EMAIL_REGEX)
+  @Length(API.User.EMAIL_MIN_LEN, API.User.EMAIL_MAX_LEN)
   email: string;
 
   @Column()
@@ -31,7 +31,10 @@ export default class User extends Mixin(Identifiable, DateTimed) {
   services: Service[];
 
   static isPasswordValid(unencryptedPassword: string | undefined) {
-    return unencryptedPassword && this.passwordRegex.test(unencryptedPassword);
+    return unencryptedPassword
+      && unencryptedPassword.length >= API.User.LOGIN_MIN_LEN
+      && unencryptedPassword.length <= API.User.LOGIN_MAX_LEN
+      && this.passwordRegex.test(unencryptedPassword);
   }
 
   /**

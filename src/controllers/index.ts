@@ -40,7 +40,7 @@ export const accept = <T extends API.Request, S = null, R = S | API.Error>(
     let code: number = 200;
     let data: R | undefined = undefined;
     {
-      if (result === null) {
+      if (result === undefined) {
         code = 204;
       } else if (Array.isArray(result)) {
         code = result[0];
