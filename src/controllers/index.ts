@@ -38,7 +38,7 @@ export const accept = <T extends API.Request, S = null, R = S | API.Error>(
     const result = await fun(await validate(req.body as T), req, res);
 
     let code: number = 200;
-    let data: R | null = null;
+    let data: R | undefined = undefined;
     {
       if (result === null) {
         code = 204;
@@ -52,7 +52,7 @@ export const accept = <T extends API.Request, S = null, R = S | API.Error>(
       }
     }
 
-    res.status(code).json(data ?? undefined);
+    res.status(code).json(data);  // undefined body sends nothing, null sends `null` as json
   } catch (err) {
     next({ controller, err, });
   }

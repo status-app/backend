@@ -53,6 +53,6 @@ export default class AuthController {
       await userRepo().save(user);
     }
 
-    return null;
+    return undefined;
   });
 }

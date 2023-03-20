@@ -32,7 +32,7 @@ export default class UserController {
   /**
    * Creates a user. Takes a {@link API.Request.User.Create} body.
    *
-   * @returns `null` on success.
+   * @returns nothing on success.
    */
   static create = accept<API.Request.User.Create>(this, async (data) => {
     let { login, email, password } = data;
@@ -59,7 +59,7 @@ export default class UserController {
   /**
    * Edits a user. Takes a partial {@link API.Request.User.Create} body.
    *
-   * @returns `null` on success.
+   * @returns nothing on success.
    */
   static edit = accept<Partial<API.User.RestrictedUser>>(this, async (data, req, _res) => {
     const id = Number.parseInt(req.params.id);
@@ -85,14 +85,14 @@ export default class UserController {
 
     await userRepo().save(user);
 
-    return null;
+    return undefined;
   });
 
   /**
    * Deletes the session user. Takes no body, uses the session user id.
    * This will not work if the user is the system user (id = 1).
    *
-   * @returns `null` on success.
+   * @returns nothing on success.
    */
   static delete = accept<null>(this, async (_, _req, res) => {
     const id = (await findUser({ id: res.locals.jwtPayload?.uid || -1 })).id;
@@ -100,6 +100,6 @@ export default class UserController {
       throw new ForbiddenError();
     }
     await userRepo().delete({ id });
-    return null;
+    return undefined;
   });
 };
