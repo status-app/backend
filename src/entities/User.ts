@@ -12,9 +12,6 @@ import Identifiable from "./mixins/Identifiable";
 export default class User extends Mixin(Identifiable, DateTimed) {
   private static passwordRegex = new RegExp(API.User.PASSWORD_REGEX);
 
-  @PrimaryGeneratedColumn()
-  id: number;
-
   @Column({ length: API.User.LOGIN_MAX_LEN })
   @Length(API.User.LOGIN_MIN_LEN, API.User.LOGIN_MAX_LEN)
   login: string;
