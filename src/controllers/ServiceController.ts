@@ -2,6 +2,7 @@ import { accept, validate } from ".";
 import { createLogger } from "../logger";
 import { API } from "../typings/api";
 import User from "../entities/User";
+import { TodoError } from "../errors";
 
 /**
  * Controller in charge of CRUD-operations related to the Service entity.
@@ -11,17 +12,14 @@ export default class ServiceController {
   static LOGGER = createLogger(ServiceController.NAME);
 
   /**
-   * Gets all single user. Takes an optional {@link API.Request.Id} body,
-   * defaulting to the user's id if none is given based off of the auth
-   * token.
+   * Gets all services.
    *
-   * @returns the found user on success.
+   * @returns an array of all monitored services.
    */
   static get = accept<null, API.Service.PublicService>(
     this,
-    // TODO accept with req params
-    async (_, req, res) => {
-      return undefined;
+    async () => {
+      throw new TodoError();
     },
   );
 };
