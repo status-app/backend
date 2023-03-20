@@ -35,7 +35,7 @@ export const accept = <T extends API.Request, S = null, R = S | API.Error>(
   fun: (data: T, req: Request, res: Response) => Promise<[number, R] | number | R>
 ) => (async (req: Request, res: Response, next: NextFunction): Promise<any> => {
   try {
-    const result = await fun(await validate(req.body as T), req, res) || null;
+    const result = await fun(await validate(req.body as T), req, res);
 
     let code: number = 200;
     let data: R | null = null;
@@ -52,7 +52,7 @@ export const accept = <T extends API.Request, S = null, R = S | API.Error>(
       }
     }
 
-    res.status(code).json(data);
+    res.status(code).json(data ?? undefined);
   } catch (err) {
     next({ controller, err, });
   }
@@ -95,12 +95,11 @@ export const findUser = async (where: FindOptionsWhere<User>, password: string =
  */
 export const matchUser = async (where: FindOptionsWhere<User>, password: string = null) => {
   try {
-    return findUser(where, password);
+    return (await findUser(where, password));
   } catch (ex) {
     if (ex instanceof API.Error) {
       return null;
     }
-    
     // Throw the exception if it isn't known (IO or DB-related)
     throw ex;
   }
