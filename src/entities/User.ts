@@ -51,7 +51,7 @@ export default class User extends Mixin(Identifiable, DateTimed) {
       return false;
     }
 
-    return bcrypt.compare(unencryptedPassword, this.password);
+    return (await bcrypt.compare(unencryptedPassword, this.password));
   }
 
   /**
