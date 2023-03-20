@@ -1,17 +1,15 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  CreateDateColumn,
-  UpdateDateColumn
-} from "typeorm";
 import { Length, Matches } from "class-validator";
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
+import { Mixin } from "ts-mixer";
 import bcrypt from "bcryptjs";
 
 import { API } from "../typings/api";
+import Service from "./Service";
+import DateTimed from "./mixins/DateTimed";
+import Identifiable from "./mixins/Identifiable";
 
 @Entity()
-export default class User {
+export default class User extends Mixin(Identifiable, DateTimed) {
   private static passwordRegex = new RegExp(API.PASSWORD_REGEX);
 
   @PrimaryGeneratedColumn()
@@ -29,13 +27,8 @@ export default class User {
   @Column()
   password: string;
 
-  @Column()
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @Column()
-  @UpdateDateColumn()
-  updatedAt: Date;
+  @OneToMany(() => Service, (svc) => svc.owner)
+  services: Service[];
 
   static isPasswordValid(unencryptedPassword: string | undefined) {
     return unencryptedPassword && this.passwordRegex.test(unencryptedPassword);

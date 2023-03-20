@@ -20,6 +20,7 @@ specifiers:
   reflect-metadata: ^0.1.13
   short-uuid: ^4.2.2
   sqlite3: ^5.1.4
+  ts-mixer: ^6.0.3
   ts-node: 10.7.0
   ts-node-dev: ^2.0.0
   typeorm: 0.3.12
@@ -49,6 +50,7 @@ devDependencies:
   '@types/express': 4.17.17
   '@types/helmet': 0.0.48
   '@types/node': 16.18.14
+  ts-mixer: 6.0.3
   ts-node: 10.7.0_jice324gebejyxftojume2rtqe
   typescript: 4.5.2
 
@@ -1791,6 +1793,10 @@ packages:
     resolution: {integrity: sha512-L0Orpi8qGpRG//Nd+H90vFB+3iHnue1zSSGmNOOCh1GLJ7rUKVwV2HvijphGQS2UmhUZewS9VgvxYIdgr+fG1A==}
     hasBin: true
     dev: false
+
+  /ts-mixer/6.0.3:
+    resolution: {integrity: sha512-k43M7uCG1AkTyxgnmI5MPwKoUvS/bRvLvUb7+Pgpdlmok8AoqmUaZxUUw8zKM5B1lqZrt41GjYgnvAi0fppqgQ==}
+    dev: true
 
   /ts-node-dev/2.0.0_jice324gebejyxftojume2rtqe:
     resolution: {integrity: sha512-ywMrhCfH6M75yftYvrvNarLEY+SUXtUvU8/0Z6llrHQVBx12GiFk5sStF8UdfE/yfzk9IAq7O5EEbTQsxlBI8w==}
