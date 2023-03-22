@@ -1,6 +1,6 @@
 import { accept, findUser, matchUser, validate } from ".";
 import { userRepo } from "../data-source";
-import { InternalError, AlreadyInUseError, MissingBodyError, ForbiddenError, NotModifiedError } from "../errors";
+import { InternalError, AlreadyInUseError, MissingBodyError, ForbiddenError, NotModifiedError, NoSuchError } from "../errors";
 import { createLogger } from "../logger";
 import { API } from "../typings/api";
 import User from "../entities/User";
@@ -23,7 +23,7 @@ export default class UserController {
     // TODO accept with req params
     async (_, req, res) => (
       await findUser({
-        id: Number.parseInt(req.params.id || res.locals.jwtPayload?.uid || "-1")
+        id: req.params.id !== undefined ? Number.parseInt(req.params.id) : res.locals.jwtPayload.uid,
       })
     ).asPublic(),
   );
@@ -56,13 +56,27 @@ export default class UserController {
   })
 
   /**
-   * Edits a user. Takes an `id` query param and a partial
+   * Edits a user. Takes an optional `id` param, defaulting to the user's
+   * id if none is given based off of the auth token, and a partial
    * {@link API.User.RestrictedUser} body.
    *
    * @returns nothing on success.
    */
-  static edit = accept<Partial<API.User.RestrictedUser>>(this, async (partialUser, req, _res) => {
-    const id = Number.parseInt(req.params.id);
+  static edit = accept<Partial<API.User.RestrictedUser>>(this, async (partialUser, req, res) => {
+    const user = await findUser({ id: res.locals.jwtPayload.uid });
+    let target: User;
+    if (req.params.id !== undefined) {
+      if (user.role !== API.User.UserRole.ADMIN) {
+        throw new ForbiddenError();
+      }
+
+      target = await findUser({ id: Number.parseInt(req.params.id || "-1") })
+      if (!target) {
+        throw new NoSuchError("user");
+      }
+    } else {
+      target = user;
+    }
 
     if (!Object.keys(partialUser).length) {
       throw new MissingBodyError();
@@ -70,9 +84,7 @@ export default class UserController {
 
     const { email } = partialUser;
 
-    const user = await findUser({ id });
-
-    if (user.email === email) {
+    if (target.email === email) {
       throw new NotModifiedError();
     }
 
@@ -80,26 +92,32 @@ export default class UserController {
       throw new AlreadyInUseError("email");
     }
 
-    user.email = email;
-    await validate(user);
-
-    await userRepo().save(user);
-
+    target.email = email;
+    await validate(target);
+    await userRepo().save(target);
     return undefined;
   });
 
   /**
    * Deletes the session user. Takes no body, uses the session user id.
-   * This will not work if the user is the system user (id = 1).
    *
    * @returns nothing on success.
    */
-  static delete = accept<null>(this, async (_, _req, res) => {
-    const id = (await findUser({ id: res.locals.jwtPayload?.uid || -1 })).id;
-    if (id === 1) {
-      throw new ForbiddenError();
+  static delete = accept<null>(this, async (_, req, res) => {
+    const user = await findUser({ id: res.locals.jwtPayload.uid });
+    if (req.params.id !== undefined) {
+      if (user.role !== API.User.UserRole.ADMIN) {
+        throw new ForbiddenError();
+      }
+
+      const result = await userRepo().delete({ id: Number.parseInt(req.params.id) });
+      if (!result.affected) {
+        throw new NoSuchError("user");
+      }
+    } else {
+      await userRepo().delete({ id: user.id });
     }
-    await userRepo().delete({ id });
+
     return undefined;
   });
 };

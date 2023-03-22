@@ -8,10 +8,6 @@ import Service from "./Service";
 import DateTimed from "./mixins/DateTimed";
 import Identifiable from "./mixins/Identifiable";
 
-export enum UserRole {
-  DEFAULT, ADMIN
-}
-
 @Entity()
 export default class User extends Mixin(Identifiable, DateTimed) {
   private static passwordRegex = new RegExp(API.User.PASSWORD_REGEX);
@@ -21,8 +17,8 @@ export default class User extends Mixin(Identifiable, DateTimed) {
   login: string;
 
   // TODO change to enum with MySQL
-  @Column({ type: "simple-enum", enum: UserRole, default: UserRole.DEFAULT })
-  role: UserRole;
+  @Column({ type: "simple-enum", enum: API.User.UserRole, default: API.User.UserRole.DEFAULT })
+  role: API.User.UserRole;
 
   @Column({ length: API.User.EMAIL_MAX_LEN })
   @Matches(API.User.EMAIL_REGEX)
@@ -66,7 +62,7 @@ export default class User extends Mixin(Identifiable, DateTimed) {
    * @returns this {@link User} as a {@link API.User.PublicUser}.
    */
   asPublic(): API.User.PublicUser {
-    return { id: this.id, login: this.login };
+    return { id: this.id, login: this.login, role: this.role };
   }
 
   /**

@@ -26,13 +26,19 @@ export namespace API {
     export const EMAIL_MIN_LEN = 6;
     export const EMAIL_MAX_LEN = 128;
     export const EMAIL_REGEX = "([!#-'*+/-9=?A-Z^-~-]+(\.[!#-'*+/-9=?A-Z^-~-]+)*|\"\(\[\]!#-[^-~ \t]|(\\[\t -~]))+\")@([!#-'*+/-9=?A-Z^-~-]+(\.[!#-'*+/-9=?A-Z^-~-]+)*|\[[\t -Z^-~]*])";
-  
+
+    export enum UserRole {
+      DEFAULT, ADMIN
+    }
+
     export class BaseUser {
       id: number;
 
       @Length(LOGIN_MIN_LEN, LOGIN_MAX_LEN)
       @Matches(LOGIN_REGEX)
       login: string;
+
+      role: UserRole;
     }
 
     export class PublicUser extends BaseUser {}

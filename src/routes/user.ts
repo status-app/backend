@@ -15,11 +15,11 @@ export default {
     .post("/", [checkNoJwt], UserController.create)
 
     // Read
-    .get("/:id([0-9]+)", [checkJwt], UserController.get)
+    .get("/:id([0-9]+)?", [checkJwt], UserController.get)
 
     // Update
-    .patch("/:id([0-9]+)", [checkJwt], UserController.edit)
+    .patch("/:id([0-9]+)?", [checkJwt], UserController.edit)
 
     // Delete
-    .delete("/:id([0-9]+)", [checkJwt], UserController.delete)
+    .delete("/:id([0-9]+)?", [checkJwt], UserController.delete)
 } as NamedRouter;
