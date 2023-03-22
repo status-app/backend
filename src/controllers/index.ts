@@ -83,7 +83,7 @@ export const findUser = async (where: FindOptionsWhere<User>, password: string =
     throw new NoSuchError("user");
   }
 
-  if (!(await user.passwordMatches(password))) {
+  if (password && !(await user.passwordMatches(password))) {
     throw new InvalidError("password");
   }
 
