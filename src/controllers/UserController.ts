@@ -1,6 +1,6 @@
 import { accept, findUser, matchUser, validate } from ".";
 import { userRepo } from "../data-source";
-import { InternalError, AlreadyInUseError, MissingBodyError, ForbiddenError, NotModifiedError, NoSuchError } from "../errors";
+import { InternalError, AlreadyInUseError, MissingBodyError, ForbiddenError, NotModifiedError, NoSuchError, InvalidError } from "../errors";
 import { createLogger } from "../logger";
 import { API } from "../typings/api";
 import User from "../entities/User";
@@ -35,6 +35,10 @@ export default class UserController {
    */
   static create = accept<API.Request.User.Create>(this, async (data) => {
     let { login, email, password } = data;
+
+    if (!User.isPasswordValid(password)) {
+      throw new InvalidError("password");
+    }
 
     let user = new User();
     user.login = login;
