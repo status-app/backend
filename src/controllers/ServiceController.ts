@@ -1,8 +1,8 @@
 import { accept, validate } from ".";
 import { createLogger } from "../logger";
 import { API } from "../typings/api";
-import User from "../entities/User";
 import { TodoError } from "../errors";
+import { serviceRepo } from "../data-source";
 
 /**
  * Controller in charge of CRUD-operations related to the Service entity.
@@ -16,10 +16,11 @@ export default class ServiceController {
    *
    * @returns an array of all monitored services.
    */
-  static get = accept<null, API.Service.PublicService>(
+  static get = accept<null, API.Service.PublicService[]>(
     this,
-    async () => {
-      throw new TodoError();
-    },
+    async () => (
+      (await serviceRepo().find())
+        .map((svc) => svc.asPublic())
+    ),
   );
 };

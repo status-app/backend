@@ -4,6 +4,7 @@ import { Entity, Column, ManyToOne } from "typeorm";
 import User from "./User";
 import DateTimed from "./mixins/DateTimed";
 import Identifiable from "./mixins/Identifiable";
+import { API } from "../typings/api";
 
 export enum ServiceMethod {
   HTTP,
@@ -25,4 +26,11 @@ export default class Service extends Mixin(Identifiable, DateTimed) {
   // TODO change to enum with MySQL
   @Column({ type: "simple-enum", enum: ServiceMethod, default: ServiceMethod.HTTP })
   method: ServiceMethod;
+
+  /**
+   * @returns this {@link Service} as a {@link API.Service.PublicService}.
+   */
+  asPublic(): API.Service.PublicService {
+    return { id: this.id };
+  }
 }
