@@ -17,9 +17,9 @@ export default class AuthController {
   /**
    * Logs the user in. Takes a {@link API.Request.Auth.Credentials} body.
    *
-   * @returns a {@link API.Response.Auth.LogIn} on success.
+   * @returns this user as a {@link API.User.SelfUser} on success.
    */
-  static login = accept<API.Request.Auth.Credentials, API.Response.Auth.LogIn>(this, async (creds) => {
+  static login = accept<API.Request.Auth.Credentials, API.User.SelfUser>(this, async (creds, _rq, rs) => {
     const user: User = await findUser({ login: creds.login }, creds.password);  // Will fail on wrong user or password
 
     const token = jwt.sign(
@@ -28,10 +28,8 @@ export default class AuthController {
       { expiresIn: "1h" },
     );
 
-    // TODO send current user instead? + token in cookies?
-    // https://dev.to/cotter/localstorage-vs-cookies-all-you-need-to-know-about-storing-jwt-tokens-securely-in-the-front-end-15id
-
-    return { token };
+    rs.setHeader("Authorization", token);
+    return user.asSelf();
   });
 
   /**

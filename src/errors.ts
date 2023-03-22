@@ -19,7 +19,7 @@ export class AlreadyInUseError extends ApiError {
 
 export class AlreadyLoggedInError extends ApiError {
   constructor() {
-    super(500, "already_logged_in");
+    super(400, "already_logged_in");
   }
 }
 

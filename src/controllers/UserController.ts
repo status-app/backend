@@ -1,8 +1,11 @@
+import jwt from "jsonwebtoken";
+
 import { accept, findUser, matchUser, validate } from ".";
 import { userRepo } from "../data-source";
 import { InternalError, AlreadyInUseError, MissingBodyError, ForbiddenError, NotModifiedError, NoSuchError, InvalidError } from "../errors";
 import { createLogger } from "../logger";
 import { API } from "../typings/api";
+import config from "../config";
 import User from "../entities/User";
 
 /**
@@ -16,24 +19,30 @@ export default class UserController {
    * Gets a single user. Takes an optional `id` param, defaulting to the user's
    * id if none is given based off of the auth token.
    *
-   * @returns the found user on success.
+   * @returns the found user on success, as an either
+   * {@link API.User.PublicUser}, {@link API.User.RestrictedUser} or
+   * {@link API.User.SelfUser}.
    */
-  static get = accept<null, API.User.PublicUser>(
+  static get = accept<null, API.User.PublicUser | API.User.RestrictedUser | API.User.SelfUser>(
     this,
     // TODO accept with req params
-    async (_, req, res) => (
-      await findUser({
-        id: req.params.id !== undefined ? Number.parseInt(req.params.id) : res.locals.jwtPayload.uid,
-      })
-    ).asPublic(),
+    async (_, req, res) => {
+      const user = await findUser({ id: res.locals.jwtPayload.uid });
+      if (req.params.id === undefined || req.params.id === `${user.id}`) {
+        return user.asSelf();
+      }
+
+      const target = await findUser({ id: Number.parseInt(req.params.id) });
+      return user.role === API.User.UserRole.ADMIN ? target.asRestricted() : target.asPublic();
+    },
   );
 
   /**
    * Creates a user. Takes a {@link API.Request.User.Create} body.
    *
-   * @returns nothing on success.
+   * @returns this user as {@link API.User.SelfUser}.
    */
-  static create = accept<API.Request.User.Create>(this, async (data) => {
+  static create = accept<API.Request.User.Create, API.User.SelfUser>(this, async (data, _rq, rs) => {
     let { login, email, password } = data;
 
     if (!User.isPasswordValid(password)) {
@@ -56,17 +65,23 @@ export default class UserController {
 
     await user.hashPassword();
     await userRepo().save(user);
-    return 201;
+    rs.setHeader("Authorization", jwt.sign(
+      { uid: user.id, login: user.login },
+      config.jwtSecret,
+      { expiresIn: "1h" },
+    ))
+    return user.asSelf();
   })
 
   /**
    * Edits a user. Takes an optional `id` param, defaulting to the user's
    * id if none is given based off of the auth token, and a partial
-   * {@link API.User.RestrictedUser} body.
+   * {@link API.User.SelfUser} body.
    *
    * @returns nothing on success.
    */
-  static edit = accept<Partial<API.User.RestrictedUser>>(this, async (partialUser, req, res) => {
+  static edit = accept<Partial<API.User.SelfUser>>(this, async (partialUser, req, res) => {
+    // TODO accepting partials with class-validator
     const user = await findUser({ id: res.locals.jwtPayload.uid });
     let target: User;
     if (req.params.id !== undefined) {

@@ -12,7 +12,8 @@ import config from "../config";
  * @param next The {@link NextFunction} object.
  */
 export const checkJwt = (req: Request, res: Response, next: NextFunction) => {
-  const token = req.headers["auth"] as string;
+  const token = req.header("Authorization");
+  console.log(req.headers);
 
   let jwtPayload;
   try {
@@ -29,7 +30,7 @@ export const checkJwt = (req: Request, res: Response, next: NextFunction) => {
     { expiresIn: "1d" }
   );
 
-  res.setHeader("token", newToken);
+  res.setHeader("Authorization", newToken);
   next();
 };
 
@@ -41,10 +42,10 @@ export const checkJwt = (req: Request, res: Response, next: NextFunction) => {
  * @param next The {@link NextFunction} object.
  */
 export const checkNoJwt = (req: Request, res: Response, next: NextFunction) => {
-  const token = req.headers["auth"] as string;
+  const token = req.header("Authorization");
 
   try {
-    jwt.verify(token, config.jwtSecret) as any;
+    jwt.verify(token, config.jwtSecret);
   } catch (error) {
     return next();
   }

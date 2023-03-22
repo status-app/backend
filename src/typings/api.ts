@@ -21,7 +21,7 @@ export namespace API {
   
     export const PASSWORD_MIN_LEN = 8;
     export const PASSWORD_MAX_LEN = 64;
-    export const PASSWORD_REGEX = `^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$`;
+    export const PASSWORD_REGEX = `^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+$`;
   
     export const EMAIL_MIN_LEN = 6;
     export const EMAIL_MAX_LEN = 128;
@@ -47,13 +47,13 @@ export namespace API {
       @Length(EMAIL_MIN_LEN, EMAIL_MAX_LEN)
       @Matches(EMAIL_REGEX)
       email: string;
+
+      createdAt: Date;
     }
   
     export class RestrictedUser extends _RestrictedUser {}
 
-    export class SelfUser extends _RestrictedUser {
-      createdAt: Date;
-    }
+    export class SelfUser extends _RestrictedUser {}
   }
 
   export interface Request {}
@@ -97,10 +97,5 @@ export namespace API {
   export interface Response {}
 
   export namespace Response {
-    export namespace Auth {
-      export interface LogIn extends Response {
-        token: string;
-      }
-    }
   }
 }

@@ -50,8 +50,8 @@ export default class User extends Mixin(Identifiable, DateTimed) {
    * @param unencryptedPassword 
    * @returns 
    */
-  async passwordMatches(unencryptedPassword: string): Promise<boolean> {
-    if (!User.isPasswordValid(unencryptedPassword)) {
+  async passwordMatches(unencryptedPassword: string | undefined): Promise<boolean> {
+    if (!unencryptedPassword || !User.isPasswordValid(unencryptedPassword)) {
       return false;
     }
 
@@ -69,13 +69,13 @@ export default class User extends Mixin(Identifiable, DateTimed) {
    * @returns this {@link User} as a {@link API.User.RestrictedUser}.
    */
   asRestricted(): API.User.RestrictedUser {
-    return { ...this.asPublic(), email: this.email };
+    return { ...this.asPublic(), email: this.email, createdAt: this.createdAt };
   }
 
   /**
    * @returns this {@link User} as a {@link API.User.SelfUser}.
    */
   asSelf(): API.User.SelfUser {
-    return { ...this.asRestricted(), createdAt: this.createdAt };
+    return { ...this.asRestricted() };
   }
 }
