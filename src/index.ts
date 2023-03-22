@@ -60,7 +60,7 @@ AppDataSource.initialize()
     ) => {
       let logger: Logger = LOGGER;
       let err: any = errorObj;
-      if (!(err instanceof Error)) {
+      if (err.controller) {
         const obj = errorObj as ErrorObject;
         logger = obj.controller.LOGGER;
         err = obj.err;
