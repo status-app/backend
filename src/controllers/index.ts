@@ -42,13 +42,17 @@ export const accept = <T extends API.Request, S = null, R = S | API.Error>(
     {
       if (result === undefined) {
         code = 204;
-      } else if (Array.isArray(result)) {
-        code = result[0];
-        data = result[1];
+      } else if (
+        Array.isArray(result)
+        && result.length === 2
+        && typeof result[0] === "number"
+      ) {
+        code = result[0] as number;
+        data = result[1] as R;
       } else if (typeof result === "number") {
-        code = result;
+        code = result as number;
       } else {
-        data = result;
+        data = result as R;
       }
     }
 
