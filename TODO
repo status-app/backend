@@ -1,7 +1,2 @@
-- Store tokens for revoke access
 - Redis? + Postgre?/Maria?
-- invalidate previous tokens when changing password
-- Backup to cloud
-- Webhooks
-- Advanced logging (files)
 - Ref: `import type`
