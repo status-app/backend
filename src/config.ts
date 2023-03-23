@@ -12,6 +12,6 @@ const logLevel = process.env.DEBUG ? 4 : parseInt(process.env.LOG_LEVEL || "1", 
 
 export default {
   jwtSecret: process.env.JWT_SECRET || "default",
-  debugLevel: logLevel,
+  logLevel,
   debugEnabled: logLevel > 1,
 };

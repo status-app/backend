@@ -99,6 +99,8 @@ export function createLogger(
   return loggerObject;
 }
 
+const COLOURISERS = Object.values(METHOD_COLORS);
+
 function writeLog(displayName: string, key: LevelNames, ...args: unknown[]) {
   const callableKey = key === "warn" ? "info" : key;
   const colouriser = METHOD_COLORS[key === "error" ? "pureError" : key];
@@ -108,9 +110,10 @@ function writeLog(displayName: string, key: LevelNames, ...args: unknown[]) {
     ...args.map((arg) => typeof arg !== "object" ? arg : inspect(arg, { breakLength: Infinity })),
   ];
 
-  console[callableKey as "log"](...consoleArgs);
-
-  writeLogToFile(key, consoleArgs);
+  if (COLOURISERS.indexOf(colouriser) <= config.logLevel) {
+    console[callableKey as "log"](...consoleArgs);
+    writeLogToFile(key, consoleArgs);
+  }
 }
 
 function writeLogToFile(key: string, consoleArgs: unknown[]) {
