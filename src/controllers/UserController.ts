@@ -76,11 +76,15 @@ export default class UserController {
   /**
    * Edits a user. Takes an optional `id` param, defaulting to the user's
    * id if none is given based off of the auth token, and a partial
-   * {@link API.User.SelfUser} body.
+   * {@link API.User.SelfUser} or {@link API.User.RestrictedUser} body.
    *
-   * @returns nothing on success.
+   * @returns a {@link API.User.SelfUser} or {@link API.User.RestrictedUser}
+   * based on the body type.
    */
-  static edit = accept<Partial<API.User.SelfUser>>(this, async (partialUser, req, res) => {
+  static edit = accept<
+    Partial<API.User.RestrictedUser | API.User.SelfUser>,
+    API.User.RestrictedUser | API.User.SelfUser
+  >(this, async (partialUser, req, res) => {
     // TODO accepting partials with class-validator
     const user = await findUser({ id: res.locals.jwtPayload.uid });
     let target: User;
@@ -114,7 +118,7 @@ export default class UserController {
     target.email = email;
     await validate(target);
     await userRepo().save(target);
-    return undefined;
+    return target.id === user.id ? target.asSelf() : target.asRestricted();
   });
 
   /**
