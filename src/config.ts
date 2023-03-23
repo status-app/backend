@@ -1,5 +1,5 @@
 import { config } from "dotenv";
-let _loaded = false; !_loaded && config() && (_loaded = true);
+let _loaded = false; !_loaded && (config() || true) && (_loaded = true);
 
 const logLevel = process.env.DEBUG ? 4 : parseInt(process.env.LOG_LEVEL || "1", 10);
 
