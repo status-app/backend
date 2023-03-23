@@ -13,7 +13,6 @@ import config from "../config";
  */
 export const checkJwt = (req: Request, res: Response, next: NextFunction) => {
   const token = req.header("Authorization");
-  console.log(req.headers);
 
   let jwtPayload;
   try {

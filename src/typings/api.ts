@@ -7,29 +7,82 @@ export namespace API {
   }
 
   export namespace Service {
-    export class BaseService {
-      // TODO
+    export enum ServiceMethod {
+      HTTP, PING,
     }
 
-    export class PublicService extends BaseService {}
+    export enum ServiceEventType {
+      /**
+       * Shows up as green.
+       */
+      INFORMATIONAL,
+
+      /**
+       * Shows up as orange/yellow.
+       */
+      PARTIAL,
+
+      /**
+       * Shows up as red.
+       */
+      CRITICAL,
+    }
+
+    export type PublicServiceEventType = Lowercase<keyof typeof ServiceEventType>;
+
+    export class ServiceEvent {
+      id: number;
+
+      ts: Date;
+
+      type: PublicServiceEventType;
+
+      description: string;
+    }
+
+    /**
+     * One day of uptime.
+     */
+    export class ServiceUptime {
+      events: ServiceEvent[];
+    }
+
+    export class BaseService {
+      id: number;
+
+      // TODO @Length
+      name: string;
+
+      description: string | null;
+
+      /**
+       * 30-items array of {@link API.Service.ServiceUptime} items, one for
+       * every past 30 days, the first item being the most recent.
+       */
+      uptime: ServiceUptime[];
+    }
+
+    export class PublicService extends BaseService { }
   }
 
   export namespace User {
     export const LOGIN_MIN_LEN = 3;
     export const LOGIN_MAX_LEN = 32;
     export const LOGIN_REGEX = `^[a-zA-Z0-9_]+$`;
-  
+
     export const PASSWORD_MIN_LEN = 8;
     export const PASSWORD_MAX_LEN = 64;
     export const PASSWORD_REGEX = `^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+$`;
-  
+
     export const EMAIL_MIN_LEN = 6;
     export const EMAIL_MAX_LEN = 128;
     export const EMAIL_REGEX = "([!#-'*+/-9=?A-Z^-~-]+(\.[!#-'*+/-9=?A-Z^-~-]+)*|\"\(\[\]!#-[^-~ \t]|(\\[\t -~]))+\")@([!#-'*+/-9=?A-Z^-~-]+(\.[!#-'*+/-9=?A-Z^-~-]+)*|\[[\t -Z^-~]*])";
 
     export enum UserRole {
-      DEFAULT, ADMIN
+      DEFAULT, ADMIN,
     }
+
+    export type PublicUserRole = Lowercase<keyof typeof UserRole>;
 
     export class BaseUser {
       id: number;
@@ -38,10 +91,10 @@ export namespace API {
       @Matches(LOGIN_REGEX)
       login: string;
 
-      role: UserRole;
+      role: PublicUserRole;
     }
 
-    export class PublicUser extends BaseUser {}
+    export class PublicUser extends BaseUser { }
 
     class _RestrictedUser extends BaseUser {
       @Length(EMAIL_MIN_LEN, EMAIL_MAX_LEN)
@@ -50,13 +103,13 @@ export namespace API {
 
       createdAt: Date;
     }
-  
-    export class RestrictedUser extends _RestrictedUser {}
 
-    export class SelfUser extends _RestrictedUser {}
+    export class RestrictedUser extends _RestrictedUser { }
+
+    export class SelfUser extends _RestrictedUser { }
   }
 
-  export interface Request {}
+  export interface Request { }
 
   export namespace Request {
     export class Id {
@@ -73,12 +126,12 @@ export namespace API {
         @Matches(API.User.PASSWORD_REGEX)
         password: string;
       }
-  
+
       export class PasswordChange implements Request {
         @Length(API.User.PASSWORD_MIN_LEN, API.User.PASSWORD_MAX_LEN)
         @Matches(API.User.PASSWORD_REGEX)
         currentPassword: string;
-  
+
         @Length(API.User.PASSWORD_MIN_LEN, API.User.PASSWORD_MAX_LEN)
         @Matches(API.User.PASSWORD_REGEX)
         newPassword: string;
@@ -94,7 +147,7 @@ export namespace API {
     }
   }
 
-  export interface Response {}
+  export interface Response { }
 
   export namespace Response {
   }

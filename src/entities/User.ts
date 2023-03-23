@@ -14,22 +14,22 @@ export default class User extends Mixin(Identifiable, DateTimed) {
 
   @Column({ length: API.User.LOGIN_MAX_LEN })
   @Length(API.User.LOGIN_MIN_LEN, API.User.LOGIN_MAX_LEN)
-  login: string;
+  login!: string;
 
   // TODO change to enum with MySQL
   @Column({ type: "simple-enum", enum: API.User.UserRole, default: API.User.UserRole.DEFAULT })
-  role: API.User.UserRole;
+  role!: API.User.UserRole;
 
   @Column({ length: API.User.EMAIL_MAX_LEN })
   @Matches(API.User.EMAIL_REGEX)
   @Length(API.User.EMAIL_MIN_LEN, API.User.EMAIL_MAX_LEN)
-  email: string;
+  email!: string;
 
   @Column()
-  password: string;
+  password!: string;
 
   @OneToMany(() => Service, (svc) => svc.owner)
-  services: Service[];
+  services!: Service[];
 
   static isPasswordValid(unencryptedPassword: string | undefined) {
     return unencryptedPassword
@@ -62,7 +62,11 @@ export default class User extends Mixin(Identifiable, DateTimed) {
    * @returns this {@link User} as a {@link API.User.PublicUser}.
    */
   asPublic(): API.User.PublicUser {
-    return { id: this.id, login: this.login, role: this.role };
+    return {
+      id: this.id,
+      login: this.login,
+      role: API.User.UserRole[this.role].toLowerCase() as API.User.PublicUserRole,
+    };
   }
 
   /**
