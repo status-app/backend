@@ -1,0 +1,693 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "v1",
+    "description": "v1",
+    "version": "0.1",
+    "contact": {
+      "name": "Contact Name",
+      "url": "Contact URL",
+      "email": "Contact E-mail"
+    },
+    "termsOfService": "Terms of Service URL",
+    "license": {
+      "name": "Lipsum",
+      "url": "https://localhost"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000"
+    }
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "summary": "Get all services",
+        "operationId": "get-root",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Services"
+          },
+          "204": {
+            "$ref": "#/components/responses/Services"
+          }
+        },
+        "description": "Gets all services.\nTodo: Filters"
+      },
+      "parameters": []
+    },
+    "/auth/basic": {
+      "post": {
+        "summary": "Log in",
+        "operationId": "post-auth-basic",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SelfUser"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "requestBody": {
+          "$ref": "#/components/requestBodies/Credentials"
+        },
+        "description": ""
+      },
+      "parameters": [],
+      "patch": {
+        "summary": "Change password",
+        "operationId": "patch-auth-basic",
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/Empty"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "description": "Changes the current user's password.",
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/PasswordChange"
+        }
+      }
+    },
+    "/user": {
+      "get": {
+        "summary": "Get self user",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SelfUser"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "operationId": "get-user",
+        "description": "Gets the current user.",
+        "security": [
+          {
+            "jwt": []
+          }
+        ]
+      },
+      "post": {
+        "summary": "Create user",
+        "operationId": "post-user",
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/SelfUser"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "description": "Creates a new user.",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/NewUser"
+        }
+      },
+      "patch": {
+        "summary": "Edit self user",
+        "operationId": "patch-user",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SelfUser"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "description": "Edits the current user.",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/PartialUser"
+        }
+      },
+      "delete": {
+        "summary": "Delete self user",
+        "operationId": "delete-user",
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/Empty"
+          }
+        },
+        "description": "Deletes the current user."
+      }
+    },
+    "/users/{id}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/Identifier"
+        }
+      ],
+      "get": {
+        "summary": "Get user",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/AnyUser"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "operationId": "get-users-id",
+        "parameters": [],
+        "description": "Gets a user from their id."
+      },
+      "patch": {
+        "summary": "Edit user",
+        "operationId": "patch-users-id",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/AnyUser"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "requestBody": {
+          "$ref": "#/components/requestBodies/PartialUser"
+        },
+        "description": "Edits a user from their id.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "query",
+            "name": "id"
+          }
+        ],
+        "security": [
+          {
+            "jwt": []
+          }
+        ]
+      },
+      "delete": {
+        "summary": "Delete user",
+        "operationId": "delete-users-id",
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/Empty"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "description": "Deletes a user from their id.",
+        "security": [
+          {
+            "jwt": []
+          }
+        ]
+      }
+    },
+    "/spec": {
+      "get": {
+        "summary": "Get spec",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              },
+              "application/x-yaml": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get-spec",
+        "description": "Gets this OpenAPI specification as JSON.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "header",
+            "name": "Accept",
+            "description": "either 'application/json' or 'application/x-yaml'"
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Identifier": {
+        "title": "Identifier",
+        "type": "integer",
+        "format": "int64"
+      },
+      "Email": {
+        "title": "Email",
+        "type": "string",
+        "examples": [
+          "admin@example.com",
+          "user@example.com"
+        ],
+        "format": "email",
+        "minLength": 6,
+        "maxLength": 128
+      },
+      "Login": {
+        "title": "Login",
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 32,
+        "examples": [
+          "admin",
+          "user"
+        ]
+      },
+      "Password": {
+        "title": "Password",
+        "type": "string",
+        "format": "password",
+        "minLength": 8,
+        "maxLength": 64,
+        "pattern": "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+$",
+        "example": "P@ssw0rd"
+      },
+      "UserRole": {
+        "type": "string",
+        "examples": [
+          "default",
+          "admin"
+        ],
+        "enum": [
+          "default",
+          "admin"
+        ],
+        "default": "default",
+        "example": "default",
+        "description": ""
+      },
+      "User": {
+        "title": "User",
+        "examples": [
+          {
+            "id": 1,
+            "login": "admin",
+            "role": "admin"
+          },
+          {
+            "id": 2,
+            "login": "user",
+            "role": "default"
+          }
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/Identifier"
+          },
+          "login": {
+            "$ref": "#/components/schemas/Login"
+          },
+          "role": {
+            "$ref": "#/components/schemas/UserRole"
+          }
+        },
+        "required": [
+          "id",
+          "login",
+          "role"
+        ]
+      },
+      "RestrictedUser": {
+        "title": "RestrictedUser",
+        "description": "A restricted view of a user",
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "email": {
+                "$ref": "#/components/schemas/Email"
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          },
+          {
+            "$ref": "#/components/schemas/User"
+          }
+        ],
+        "examples": [
+          {
+            "email": "admin@example.com",
+            "createdAt": "2019-08-24T14:15:22Z",
+            "id": 1,
+            "login": "admin",
+            "role": "admin"
+          }
+        ]
+      },
+      "SelfUser": {
+        "title": "SelfUser",
+        "description": "A private view of a user",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/RestrictedUser"
+          }
+        ]
+      },
+      "ServiceCheckMethod": {
+        "title": "ServiceMethod",
+        "type": "string",
+        "enum": [
+          "http",
+          "ping",
+          "dns",
+          "mysql",
+          "redis",
+          "push"
+        ]
+      },
+      "ServiceEventType": {
+        "title": "ServiceEventType",
+        "type": "string",
+        "enum": [
+          "informational",
+          "partial",
+          "critical"
+        ],
+        "description": ""
+      },
+      "ServiceEvent": {
+        "title": "ServiceEvent",
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/Identifier"
+          },
+          "ts": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ServiceEventType"
+          }
+        }
+      },
+      "ServiceUptime": {
+        "title": "ServiceUptime",
+        "type": "object",
+        "description": "One day of uptime",
+        "properties": {
+          "events": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "$ref": "#/components/schemas/ServiceEvent"
+            }
+          }
+        }
+      },
+      "Service": {
+        "title": "Service",
+        "type": "object",
+        "examples": [],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/Identifier"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 32,
+            "minLength": 2
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 255,
+            "minLength": 1
+          },
+          "uptime": {
+            "type": "array",
+            "minItems": 30,
+            "maxItems": 30,
+            "items": {
+              "$ref": "#/components/schemas/ServiceUptime"
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "jwt": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": ""
+      }
+    },
+    "requestBodies": {
+      "Credentials": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "login": {
+                  "$ref": "#/components/schemas/Login"
+                },
+                "password": {
+                  "$ref": "#/components/schemas/Password"
+                }
+              },
+              "required": [
+                "login",
+                "password"
+              ]
+            }
+          }
+        }
+      },
+      "PasswordChange": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "currentPassword": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/Password"
+                    },
+                    {
+                      "type": [
+                        "null"
+                      ],
+                      "items": {}
+                    }
+                  ]
+                },
+                "newPassword": {
+                  "$ref": "#/components/schemas/Password"
+                }
+              },
+              "required": [
+                "currentPassword",
+                "newPassword"
+              ]
+            }
+          }
+        }
+      },
+      "NewUser": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/User"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "password": {
+                      "$ref": "#/components/schemas/Password"
+                    }
+                  }
+                }
+              ]
+            },
+            "examples": {
+              "Example 1": {
+                "value": {
+                  "id": 1,
+                  "login": "admin",
+                  "role": "admin",
+                  "password": "P@ssw0rd"
+                }
+              }
+            }
+          }
+        }
+      },
+      "PartialUser": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/User"
+            }
+          }
+        },
+        "description": "TODO"
+      }
+    },
+    "responses": {
+      "Error": {
+        "description": "",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "headers": {
+          "header-0": {
+            "schema": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "PublicUser": {
+        "description": "Example response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/User"
+            }
+          }
+        }
+      },
+      "RestrictedUser": {
+        "description": "Example response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/RestrictedUser"
+            }
+          }
+        }
+      },
+      "SelfUser": {
+        "description": "Example response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SelfUser"
+            }
+          }
+        }
+      },
+      "AnyUser": {
+        "description": "Example response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/User"
+                },
+                {
+                  "$ref": "#/components/schemas/RestrictedUser"
+                },
+                {
+                  "$ref": "#/components/schemas/SelfUser"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "Empty": {
+        "description": "Example response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "id": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "Services": {
+        "description": "Example response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "$ref": "#/components/schemas/Service"
+              }
+            }
+          }
+        }
+      }
+    },
+    "parameters": {
+      "Identifier": {
+        "name": "id",
+        "in": "path",
+        "schema": {
+          "type": "integer",
+          "format": "int64",
+          "minimum": 1
+        },
+        "required": true
+      }
+    }
+  }
+}
