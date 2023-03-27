@@ -583,17 +583,16 @@
             "schema": {
               "type": "object",
               "properties": {
-                "message": {
+                "error": {
                   "type": "string"
+                },
+                "goTo": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
                 }
               }
-            }
-          }
-        },
-        "headers": {
-          "header-0": {
-            "schema": {
-              "type": "string"
             }
           }
         }
