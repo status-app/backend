@@ -1,7 +1,7 @@
 import { decorate } from "ts-mixer";
 import { PrimaryGeneratedColumn } from "typeorm";
 
-export default class Identifiable {
+export class Identifiable {
   @decorate(PrimaryGeneratedColumn())
   id!: number;
 }

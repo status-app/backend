@@ -1,7 +1,7 @@
 import { decorate } from "ts-mixer";
 import { Column, CreateDateColumn, UpdateDateColumn } from "typeorm";
 
-export default class DateTimed {
+export class DateTimed {
   @decorate(Column())
   @decorate(CreateDateColumn())
   createdAt!: Date;

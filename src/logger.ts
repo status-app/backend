@@ -6,7 +6,7 @@ import { bold, cyan, gray, green, magenta, red, yellow } from "chalk";
 import { createWriteStream, existsSync, mkdirSync } from "fs";
 import { inspect } from "util";
 
-import config from "./config";
+import { config } from "./config";
 
 const METHOD_COLORS = {
   debug: gray,
@@ -46,7 +46,7 @@ export function createLogger(
 ): Logger;
 export function createLogger(
   name = "",
-  opts?: { childNames?: string[]; debugEnabled?: boolean }
+  opts?: { childNames?: string[]; debugEnabled?: boolean },
 ) {
   const knownChildNames = opts?.childNames ?? [];
   const debugEnabled = opts?.debugEnabled ?? config.debugEnabled;
@@ -81,8 +81,8 @@ export function createLogger(
       if (typeof err === "undefined") {
         loggerObject.pureError(
           new Error(
-            'Error object provided to error printer was "undefined". Using quasi-error for stacktrace instead'
-          )
+            "Error object provided to error printer was \"undefined\". Using quasi-error for stacktrace instead",
+          ),
         );
       } else {
         loggerObject.pureError(err);
@@ -92,7 +92,7 @@ export function createLogger(
     child: (...childNames: string[]) =>
       createLogger(
         effectiveName,
-        { debugEnabled, childNames: [...knownChildNames, ...childNames] }
+        { debugEnabled, childNames: [...knownChildNames, ...childNames] },
       ),
   };
 
@@ -131,7 +131,7 @@ function writeLogToFile(key: string, consoleArgs: unknown[]) {
       {
         flags: "a", // Append it
         encoding: "utf-8",
-      }
+      },
     );
 
     // Replace error objects by their stack and pretty-print object args
@@ -149,8 +149,8 @@ function writeLogToFile(key: string, consoleArgs: unknown[]) {
       prettyArgs.join(" ").replace(
         // eslint-disable-next-line no-control-regex
         /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g,
-        ""
-      ) + "\n"
+        "",
+      ) + "\n",
     );
 
     // Avoid EMFILE errors by closing the stream when we're done using it.

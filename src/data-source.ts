@@ -1,12 +1,13 @@
-import { DataSource, Repository } from "typeorm";
+import type { Repository } from "typeorm";
+import { DataSource } from "typeorm";
 
-import config from "./config";
-import Service from "./entities/Service";
-import User from "./entities/User";
+import { config } from "./config";
+import { Service } from "./entities/Service";
+import { User } from "./entities/User";
 
 // TODO .env
 
-export const AppDataSource = new DataSource({
+const DATA_SOURCE = new DataSource({
   type: "sqlite",
   database: "run/db.sqlite",
   synchronize: true,
@@ -16,12 +17,17 @@ export const AppDataSource = new DataSource({
   migrations: [ "src/migrations/**/*.ts" ],
 });
 
+export const initializeDataSource = (): Promise<DataSource> =>
+  DATA_SOURCE.initialize();
+
 /**
  * @returns the user repository.
  */
 export const userRepo = (): Repository<User> =>
-  AppDataSource.getRepository(User);
+  DATA_SOURCE.getRepository(User);
 
-
+/**
+ * @returns the service repository.
+ */
 export const serviceRepo = (): Repository<Service> =>
-  AppDataSource.getRepository(Service);
+  DATA_SOURCE.getRepository(Service);

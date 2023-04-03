@@ -1,13 +1,38 @@
 import { Mixin } from "ts-mixer";
 import { Entity, Column, ManyToOne } from "typeorm";
 
-import User from "./User";
-import DateTimed from "./mixins/DateTimed";
-import Identifiable from "./mixins/Identifiable";
-import { API } from "../typings/api";
+import type { Adapter } from "../util/adapter";
+import { User } from "./User";
+import { DateTimed } from "./mixins/DateTimed";
+import { Identifiable } from "./mixins/Identifiable";
+import { generateAdapter } from "../util/adapter";
+import * as APIv1 from "../v1/api";
+
+export const V1ServiceMethod: Adapter<APIv1.Service.Method> =
+  generateAdapter(APIv1.Service.METHODS);
+
+export const V1ServiceKind: Adapter<APIv1.Service.Kind> =
+  generateAdapter(APIv1.Service.KINDS);
+
+export enum Type {
+  /**
+   * Shows up as green.
+   */
+  INFORMATIONAL,
+
+  /**
+   * Shows up as orange/yellow.
+   */
+  PARTIAL,
+
+  /**
+   * Shows up as red.
+   */
+  CRITICAL,
+}
 
 @Entity()
-export default class Service extends Mixin(Identifiable, DateTimed) {
+export class Service extends Mixin(Identifiable, DateTimed) {
   @Column()
   // TODO @Length
   name!: string;
@@ -19,13 +44,13 @@ export default class Service extends Mixin(Identifiable, DateTimed) {
   owner!: User;
 
   // TODO change to enum with MySQL
-  @Column({ type: "simple-enum", enum: API.Service.ServiceMethod, default: API.Service.ServiceMethod.HTTP })
-  method!: API.Service.ServiceMethod;
+  @Column({ type: "simple-enum", enum: V1ServiceMethod, default: V1ServiceMethod.HTTP })
+  method!: APIv1.Service.Method;
 
   /**
-   * @returns this {@link Service} as a {@link API.Service.PublicService}.
+   * @returns this {@link Service} as a {@link APIv1.Service.Public}.
    */
-  asPublic(): API.Service.PublicService {
+  asPublic(): APIv1.Service.Public {
     return {
       id: this.id,
       name: this.name,

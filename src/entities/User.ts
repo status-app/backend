@@ -1,28 +1,34 @@
 import { Length, Matches } from "class-validator";
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
+import { Entity, Column, OneToMany } from "typeorm";
 import { Mixin } from "ts-mixer";
 import bcrypt from "bcryptjs";
 
-import { API } from "../typings/api";
-import Service from "./Service";
-import DateTimed from "./mixins/DateTimed";
-import Identifiable from "./mixins/Identifiable";
+import type { Adapter } from "../util/adapter";
+import type { Class } from "../util/class";
+import { generateAdapter } from "../util/adapter";
+import { Service } from "./Service";
+import { DateTimed } from "./mixins/DateTimed";
+import { Identifiable } from "./mixins/Identifiable";
+import * as APIv1 from "../v1/api";
+
+export const UserRole: Adapter<APIv1.User.Role> =
+  generateAdapter(APIv1.User.ROLES);
 
 @Entity()
-export default class User extends Mixin(Identifiable, DateTimed) {
-  private static passwordRegex = new RegExp(API.User.PASSWORD_REGEX);
+export class User extends Mixin(Identifiable, DateTimed) {
+  private static passwordRegex = new RegExp(APIv1.User.PASSWORD_REGEX);
 
-  @Column({ length: API.User.LOGIN_MAX_LEN })
-  @Length(API.User.LOGIN_MIN_LEN, API.User.LOGIN_MAX_LEN)
+  @Column({ length: APIv1.User.LOGIN_MAX_LEN })
+  @Length(APIv1.User.LOGIN_MIN_LEN, APIv1.User.LOGIN_MAX_LEN)
   login!: string;
 
   // TODO change to enum with MySQL
-  @Column({ type: "simple-enum", enum: API.User.UserRole, default: API.User.UserRole.DEFAULT })
-  role!: API.User.UserRole;
+  @Column({ type: "simple-enum", enum: UserRole, default: UserRole.DEFAULT })
+  role!: APIv1.User.Role;
 
-  @Column({ length: API.User.EMAIL_MAX_LEN })
-  @Matches(API.User.EMAIL_REGEX)
-  @Length(API.User.EMAIL_MIN_LEN, API.User.EMAIL_MAX_LEN)
+  @Column({ length: APIv1.User.EMAIL_MAX_LEN })
+  @Matches(APIv1.User.EMAIL_REGEX)
+  @Length(APIv1.User.EMAIL_MIN_LEN, APIv1.User.EMAIL_MAX_LEN)
   email!: string;
 
   @Column()
@@ -33,8 +39,8 @@ export default class User extends Mixin(Identifiable, DateTimed) {
 
   static isPasswordValid(unencryptedPassword: string | undefined) {
     return unencryptedPassword
-      && unencryptedPassword.length >= API.User.LOGIN_MIN_LEN
-      && unencryptedPassword.length <= API.User.LOGIN_MAX_LEN
+      && unencryptedPassword.length >= APIv1.User.LOGIN_MIN_LEN
+      && unencryptedPassword.length <= APIv1.User.LOGIN_MAX_LEN
       && this.passwordRegex.test(unencryptedPassword);
   }
 
@@ -59,27 +65,47 @@ export default class User extends Mixin(Identifiable, DateTimed) {
   }
 
   /**
-   * @returns this {@link User} as a {@link API.User.PublicUser}.
+   * @returns this {@link User} as a {@link APIv1.User.Public}.
    */
-  asPublic(): API.User.PublicUser {
+  asPublic(): APIv1.User.Public {
     return {
       id: this.id,
       login: this.login,
-      role: API.User.UserRole[this.role].toLowerCase() as API.User.PublicUserRole,
+      role: this.role,
     };
   }
 
   /**
-   * @returns this {@link User} as a {@link API.User.RestrictedUser}.
+   * @returns this {@link User} as an {@link APIv1.User.Restricted}.
    */
-  asRestricted(): API.User.RestrictedUser {
+  asRestricted(): APIv1.User.Restricted {
     return { ...this.asPublic(), email: this.email, createdAt: this.createdAt };
   }
 
   /**
-   * @returns this {@link User} as a {@link API.User.SelfUser}.
+   * @returns this {@link User} as an {@link APIv1.User.Self}.
    */
-  asSelf(): API.User.SelfUser {
+  asSelf(): APIv1.User.Self {
     return { ...this.asRestricted() };
+  }
+
+  /**
+   * @param tClass the class of the type to return.
+   * @returns this {@link User} as `T`.
+   */
+  as<T extends APIv1.User>(tClass: Class<T>) {
+    if (tClass === APIv1.User.Restricted) {
+      return this.asRestricted() as T;
+    }
+
+    if (tClass === APIv1.User.Self) {
+      return this.asSelf() as T;
+    }
+
+    if (tClass === APIv1.User.Public) {
+      return this.asPublic() as T;
+    }
+
+    throw new Error("unknown user type " + tClass?.constructor.name);
   }
 }
