@@ -3,8 +3,8 @@ import { Entity, Column, ManyToOne } from "typeorm";
 
 import type { Adapter } from "../util/adapter";
 import { User } from "./User";
-import { DateTimed } from "./mixins/DateTimed";
-import { Identifiable } from "./mixins/Identifiable";
+import { DateTimed } from "./mixin/DateTimed";
+import { Identifiable } from "./mixin/Identifiable";
 import { generateAdapter } from "../util/adapter";
 import * as APIv1 from "../v1/api";
 

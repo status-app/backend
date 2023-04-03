@@ -1,4 +1,4 @@
-export const METHODS = ["http", "ping"] as const;
+export const METHODS = ["http", "ping", "dns"] as const;
 export type Method = typeof METHODS[number];
 
 export const KINDS = ["informational", "partial", "critical"] as const;

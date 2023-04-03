@@ -7,8 +7,8 @@ import type { Adapter } from "../util/adapter";
 import type { Class } from "../util/class";
 import { generateAdapter } from "../util/adapter";
 import { Service } from "./Service";
-import { DateTimed } from "./mixins/DateTimed";
-import { Identifiable } from "./mixins/Identifiable";
+import { DateTimed } from "./mixin/DateTimed";
+import { Identifiable } from "./mixin/Identifiable";
 import * as APIv1 from "../v1/api";
 
 export const UserRole: Adapter<APIv1.User.Role> =

@@ -2,8 +2,8 @@ import type { Repository } from "typeorm";
 import { DataSource } from "typeorm";
 
 import { config } from "./config";
-import { Service } from "./entities/Service";
-import { User } from "./entities/User";
+import { Service } from "./entity/Service";
+import { User } from "./entity/User";
 
 // TODO .env
 
@@ -12,9 +12,9 @@ const DATA_SOURCE = new DataSource({
   database: "run/db.sqlite",
   synchronize: true,
   logging: config.debugEnabled,
-  entities: [ "src/entities/**/*.ts" ],
-  subscribers: [ "src/subscribers/**/*.ts" ],
-  migrations: [ "src/migrations/**/*.ts" ],
+  entities: [ "src/entity/**/*.ts" ],
+  subscribers: [ "src/subscriber/**/*.ts" ],
+  migrations: [ "src/migration/**/*.ts" ],
 });
 
 export const initializeDataSource = (): Promise<DataSource> =>

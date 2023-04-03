@@ -1,6 +1,6 @@
 import type * as API from "./api";
 import type { V1Controller } from "./V1Controller";
-import type { User } from "../entities/User";
+import type { User } from "../entity/User";
 import { accept, acceptAuthenticated } from "./util/express";
 import { serializeSecurityToken } from "./util/security";
 import { findUser } from "./util/user";

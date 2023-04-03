@@ -1,6 +1,6 @@
 import type { FindOptionsWhere } from "typeorm";
 
-import type { User } from "../../entities/User";
+import type { User } from "../../entity/User";
 import { invalid, noSuch } from "./status";
 import { userRepo } from "../../data-source";
 
