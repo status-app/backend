@@ -59,7 +59,7 @@ export const alreadyInUse = (what: string): APIResponse =>
 export const internal = (what?: Error | string): APIResponse =>
   error(
     500,
-    what instanceof Error ? what.message : what,
+    what instanceof Error ? "internal" : what,
     what instanceof Error ? what : undefined,
   );
 
