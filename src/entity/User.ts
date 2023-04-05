@@ -31,6 +31,8 @@ export class User extends Mixin(Identifiable, DateTimed) {
   @Length(APIv1.User.EMAIL_MIN_LEN, APIv1.User.EMAIL_MAX_LEN)
   email!: string;
 
+  google?: string;
+
   @Column()
   password!: string;
 

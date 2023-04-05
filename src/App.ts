@@ -62,6 +62,12 @@ export class App extends Controller<null> {
     return this._port;
   }
 
+  publicUrl(path?: string): string {
+    const host = this.host.includes(":") ? `[${this.host}]` : this.host;
+    const port = this.port !== 80 ? `:${this.port}` : "";
+    return `http://${host === "[::1]" ? "localhost" : host}${port}${this.url(path)}`;
+  }
+
   async start(): Promise<void> {
     const epoch = Date.now();
 
@@ -80,17 +86,11 @@ export class App extends Controller<null> {
     return new Promise((res, _rej) => {
       const httpServer = this.express.listen(this.port, this.host, () => {
         const addr = httpServer.address() as { address: string, port: number };
-        let host = addr.address as string;
-        this._host = host;
+        this._host = addr.address as string;
         this._port = addr.port as number;
 
-        // IPv6 support
-        if (host.includes(":")) {
-          host = `[${host}]`;
-        }
-
         this.logger.info(
-          `Live on http://${host}:${this.port}${this.url()} - Took ${Date.now() - epoch}ms`,
+          `Live on ${this.publicUrl()} - Took ${Date.now() - epoch}ms`,
         );
 
         res();

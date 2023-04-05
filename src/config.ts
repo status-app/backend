@@ -15,4 +15,6 @@ export const config = {
   logLevel,
   debugEnabled: logLevel > 1,
   staticFolderPath: path.join(__dirname, "..", "static"),
+  googleClientId: "512600077848-80g64pcb3msbuto3lfc2ftqeuoi1ntmd.apps.googleusercontent.com",
+  googleClientSecret: process.env.GOOGLE_SECRET,
 };
