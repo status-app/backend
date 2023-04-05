@@ -1,4 +1,4 @@
-import type { FindOptionsWhere } from "typeorm";
+import type { FindOperator, FindOptionsWhere } from "typeorm";
 
 import type { User } from "../../entity/User";
 import { invalid, noSuch } from "./status";
@@ -19,7 +19,8 @@ export const findUser = async (where: FindOptionsWhere<User>, password: string =
   let user: User;
   if (
     where.id === 0 ||
-    (where.id && where.id < 0) ||
+    (where.id as FindOperator<number>)?.value === 0 ||
+    (where.id && ((typeof where.id === "number" ? where.id : where.id.value) < 0)) ||
     !(user = await userRepo().findOne({ where }))
   ) {
     throw noSuch("user");
