@@ -39,13 +39,7 @@ export class App extends Controller<null> {
 
     // External middlewares.
     this.express.use(
-      cors({
-        origin: [
-          `http://${this.host}:${this.port}`,
-          // TODO `https://${this.host}:${this.port}`,
-        ],
-        credentials: true,
-      }),
+      cors({ credentials: true }),
       helmet(),
     );
   }
