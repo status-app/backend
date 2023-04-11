@@ -1,13 +1,17 @@
 import * as API from "./api";
 import type { V1Controller } from "./V1Controller";
 import type { Class } from "../util/class";
-import { acceptAuthenticated, acceptMaybeAuthenticated } from "./util/express";
+import { accept, acceptAuthenticated, acceptMaybeAuthenticated } from "./util/express";
 import { forbidden } from "./util/status";
 import { findUser } from "./util/user";
 import { Controller } from "../Controller";
 import { userRepo } from "../data-source";
 
 export class UserController extends Controller<V1Controller> {
+  async count(): Promise<API.Response.Count> {
+    return { number: (await userRepo().count()) };
+  }
+
   async fromId<T extends API.User>(
     id: number,
     tClass: Class<T>,
@@ -45,6 +49,8 @@ export class UserController extends Controller<V1Controller> {
         async (securityPayload, data) => await this.edit(securityPayload.uid, data),
       ),
     );
+
+    this.get(accept<null, API.Response.Count>(this.count), "s/count");
 
     this.get(
       acceptMaybeAuthenticated<null, API.User>(async (securityPayload, _, rq) => {
