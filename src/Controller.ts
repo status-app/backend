@@ -91,8 +91,14 @@ export class Controller<P extends Controller<any>> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ...args: any[]
   ): void {
-    const realPath = path ?? "";
+    let router = this.router;
+    let realPath = path ?? "";
     this.logger.debug("Routing", type.toUpperCase(), this.url(realPath));
-    this.router[type](realPath, fun, ...args);
+    if (realPath && !realPath.startsWith("/")) {
+      router = this.parent.router;
+      realPath = this.basePath + realPath;
+      this.logger.debug("^(Used parent router)");
+    }
+    router[type](realPath, fun, ...args);
   }
 }
