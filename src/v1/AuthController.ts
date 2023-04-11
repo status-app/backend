@@ -2,17 +2,17 @@ import axios, { AxiosError } from "axios";
 
 import type * as API from "./api";
 import type { V1Controller } from "./V1Controller";
-import type { User } from "../entity/User";
+import { User } from "../entity/User";
 import { accept, acceptAuthenticated } from "./util/express";
 import { serializeSecurityToken } from "./util/security";
-import { findUser } from "./util/user";
+import { findUser, matchUser } from "./util/user";
 import { validate } from "./util/validate";
 import { config } from "../config";
 import { Controller } from "../Controller";
 import { userRepo } from "../data-source";
 import { stringify as queryStringify } from "querystring";
 import { App } from "../App";
-import { badRequest, internal, success } from "./util/status";
+import { alreadyInUse, badRequest, internal, invalid, success } from "./util/status";
 
 export class AuthController extends Controller<V1Controller> {
   private GOOGLE_LOGIN_URL: string;
@@ -21,16 +21,42 @@ export class AuthController extends Controller<V1Controller> {
     super(parent);
   }
 
+  // POST /auth/register
+  async signUp(
+    data: API.Request.Auth.SignUp,
+  ) {
+    const { login, email, password } = data;
+
+    if (!User.isPasswordValid(password)) {
+      throw invalid("password");
+    }
+
+    const user = new User();
+    user.login = login;
+    user.email = email;
+    user.password = password;
+    await validate(user);
+
+    if (await matchUser({ login })) {
+      throw alreadyInUse("login");
+    }
+
+    if (await matchUser({ email })) {
+      throw alreadyInUse("email");
+    }
+
+    await user.hashPassword();
+    await userRepo().save(user);
+
+    return AuthController.generateToken(user);
+  }
+
   // POST /auth/basic
   async login(
     creds: API.Request.Auth.Credentials,
   ): Promise<[string, API.User]> {
     const user: User = await findUser({ login: creds.login }, creds.password);  // Will fail on wrong user or password
-
-    return [
-      await serializeSecurityToken({ uid: user.id, login: user.login }),
-      user.asSelf(),
-    ];
+    return AuthController.generateToken(user);
   }
 
   // PATCH /auth/basic
@@ -98,6 +124,17 @@ export class AuthController extends Controller<V1Controller> {
     super.register();
 
     this.post(
+      accept<API.Request.Auth.SignUp, API.User>(
+        async (data, _rq, rs) => {
+          const [token, user] = await this.signUp(data);
+          rs.header("Authorization", token);
+          return user;
+        },
+      ),
+      "/signUp",
+    );
+
+    this.post(
       accept<API.Request.Auth.Credentials, API.User>(
         async (creds, _rq, rs) => {
           const [token, user] = await this.login(creds);
@@ -142,5 +179,12 @@ export class AuthController extends Controller<V1Controller> {
 
       nxt(success({ code: rq.query.code }));
     }, "/google");
+  }
+
+  static async generateToken(user: User): Promise<[string, API.User.Self]> {
+    return [
+      await serializeSecurityToken({ uid: user.id, login: user.login }),
+      user.asSelf(),
+    ];
   }
 }
