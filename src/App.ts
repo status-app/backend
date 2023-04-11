@@ -7,6 +7,7 @@ import { generate as genShortUuid } from "short-uuid";
 import cors from "cors";
 import helmet from "helmet";
 import express from "express";
+import bodyParser from "body-parser";
 
 /**
  * The application singleton.
@@ -25,6 +26,8 @@ export class App extends Controller<null> {
   private constructor() {
     super(null);
     this.basePath = "";
+
+    this.express.use(bodyParser.json());
 
     // Logger middleware. TODO: Move that?
     this.express.use((rq: Request, rs: Response, nxt: NextFun) => {
