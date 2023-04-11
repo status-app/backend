@@ -26,7 +26,7 @@ export const serializeSecurityToken = (
       payload,
       config.jwtSecret,
       { ...options, expiresIn: "1h" },
-      (err, token) => (err ? rej(err) : res(token)),
+      (err, token) => (err ? rej(err) : res("Bearer " + token)),
     );
   });
 
@@ -43,8 +43,10 @@ export const deserializeSecurityToken = (
   options?: jwt.VerifyOptions & { complete: boolean },
 ): Promise<SecurityPayload> =>
   new Promise((res, rej) => {
+    if (!token.startsWith("Bearer ")) return rej("invalid token");
+
     jwt.verify(
-      token,
+      token.replace("Bearer ", ""),
       config.jwtSecret,
       options,
       (err: jwt.VerifyErrors, payload: jwt.Jwt & SecurityPayload) => (

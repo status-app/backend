@@ -16,8 +16,6 @@ export const UserRole: Adapter<APIv1.User.Role> =
 
 @Entity()
 export class User extends Mixin(Identifiable, DateTimed) {
-  private static passwordRegex = new RegExp(APIv1.User.PASSWORD_REGEX);
-
   @Column({ length: APIv1.User.LOGIN_MAX_LEN })
   @Length(APIv1.User.LOGIN_MIN_LEN, APIv1.User.LOGIN_MAX_LEN)
   login!: string;
@@ -41,9 +39,9 @@ export class User extends Mixin(Identifiable, DateTimed) {
 
   static isPasswordValid(unencryptedPassword: string | undefined) {
     return unencryptedPassword
-      && unencryptedPassword.length >= APIv1.User.LOGIN_MIN_LEN
-      && unencryptedPassword.length <= APIv1.User.LOGIN_MAX_LEN
-      && this.passwordRegex.test(unencryptedPassword);
+      && unencryptedPassword.length >= APIv1.User.PASSWORD_MIN_LEN
+      && unencryptedPassword.length <= APIv1.User.PASSWORD_MAX_LEN
+      && APIv1.User.PASSWORD_REGEX.test(unencryptedPassword);
   }
 
   /**

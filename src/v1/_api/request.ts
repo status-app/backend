@@ -30,12 +30,13 @@ export namespace Auth {
     @Matches(_User.PASSWORD_REGEX)
     newPassword: string;
   }
-}
 
-export namespace User {
-  export class Create extends _User.Restricted implements Request {
+  export class SignUp extends _User.Restricted implements Request {
     @Length(_User.PASSWORD_MIN_LEN, _User.PASSWORD_MAX_LEN)
     @Matches(_User.PASSWORD_REGEX)
     password: string;
   }
+}
+
+export namespace User {
 }

@@ -7,7 +7,7 @@ export const LOGIN_REGEX = "^[a-zA-Z0-9_]+$";
 
 export const PASSWORD_MIN_LEN = 8;
 export const PASSWORD_MAX_LEN = 64;
-export const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+$/;
+export const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_\-+={}[\]\\|:;"'<>,.?/~`]).*$/;
 
 export const EMAIL_MIN_LEN = 6;
 export const EMAIL_MAX_LEN = 128;
