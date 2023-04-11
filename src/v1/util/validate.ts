@@ -13,7 +13,7 @@ import { todo } from "./status";
 export const validate = async <T extends object>(
   t: T,
 ): Promise<T> => {
-  if (!t) return null;
+  if (!t) throw todo("handle_null_or_empty_body");
 
   const errors: ValidationError[] = await validateClass(t);
   if (errors.length) {
