@@ -28,11 +28,14 @@ export class SpecController extends Controller<V1Controller> {
   register(): void {
     super.register();
     this.get((rq, rs) => {
-      const accept = rq.header("Accept");
-      if (accept === "application/x-yaml") {
-        return rs.status(200).send(this.yaml());
-      }
-      return rs.status(200).send(this.json());
+      const yaml = rq.header("Accept").toLowerCase() === "application/x-yaml";
+      const data = yaml
+        ? this.yaml()
+        : this.json();
+
+      return rs.status(200)
+        .header("Content-Type", `application/${yaml ? "x-yaml" : "json"}`)
+        .send(data);
     });
   }
 }
