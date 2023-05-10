@@ -12,7 +12,7 @@ export class SpecController extends Controller<V1Controller> {
   private readonly yamlSpec = toYaml(JSON.parse(this.jsonSpec), { strict: true });
 
   // GET /spec
-  // With 'Accept' header set to 'application/json'
+  // With 'Accept' header set to anything but 'application/x-yaml'
   json(): string {
     // TODO
     return this.jsonSpec;
@@ -27,14 +27,12 @@ export class SpecController extends Controller<V1Controller> {
 
   register(): void {
     super.register();
-    this.get((rq, rs, next) => {
+    this.get((rq, rs) => {
       const accept = rq.header("Accept");
-      if (accept === "application/json") {
-        return rs.status(200).send(this.json());
-      } else if (accept === "application/x-yaml") {
+      if (accept === "application/x-yaml") {
         return rs.status(200).send(this.yaml());
       }
-      next(); // 404
+      return rs.status(200).send(this.json());
     });
   }
 }
