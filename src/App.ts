@@ -29,6 +29,12 @@ export class App extends Controller<null> {
 
     this.express.use(bodyParser.json());
 
+    // External middlewares.
+    this.express.use(
+      cors({ credentials: true, exposedHeaders: ["Authorization"] }),
+      helmet(),
+    );
+
     // Logger middleware. TODO: Move that?
     this.express.use((rq: Request, rs: Response, nxt: NextFun) => {
       const id = genShortUuid();
@@ -39,12 +45,6 @@ export class App extends Controller<null> {
       });
       nxt();
     });
-
-    // External middlewares.
-    this.express.use(
-      cors({ credentials: true }),
-      helmet(),
-    );
   }
 
   static get INSTANCE() {
@@ -60,7 +60,10 @@ export class App extends Controller<null> {
   }
 
   publicUrl(path?: string): string {
-    const host = this.host.includes(":") ? `[${this.host}]` : this.host;
+    let host = this.host.includes(":") ? `[${this.host}]` : this.host;
+    if (host === "0.0.0.0" || host === "[::1]") {
+      host = "localhost";
+    }
     const port = this.port !== 80 ? `:${this.port}` : "";
     return `http://${host === "[::1]" ? "localhost" : host}${port}${this.url(path)}`;
   }

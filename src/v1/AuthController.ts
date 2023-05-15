@@ -1,6 +1,6 @@
 import axios, { AxiosError } from "axios";
 
-import type * as API from "./api";
+import * as API from "./api";
 import type { V1Controller } from "./V1Controller";
 import { User } from "../entity/User";
 import { accept, acceptAuthenticated } from "./util/express";
@@ -12,9 +12,11 @@ import { Controller } from "../Controller";
 import { userRepo } from "../data-source";
 import { stringify as queryStringify } from "querystring";
 import { App } from "../App";
-import { alreadyInUse, badRequest, internal, invalid, success } from "./util/status";
+import { alreadyInUse, internal, invalid, notAuthenticated } from "./util/status";
 
 export class AuthController extends Controller<V1Controller> {
+  private static DASHBOARD_CALLBACK_URI = "http://localhost:3001/~";
+
   private GOOGLE_LOGIN_URL: string;
 
   constructor(parent: V1Controller) {
@@ -51,7 +53,7 @@ export class AuthController extends Controller<V1Controller> {
     return AuthController.generateToken(user);
   }
 
-  // POST /auth/basic
+  // POST AUTHENTICATED /auth/basic
   async login(
     creds: API.Request.Auth.Credentials,
   ): Promise<[string, API.User]> {
@@ -78,23 +80,29 @@ export class AuthController extends Controller<V1Controller> {
     return undefined;
   }
 
-  // GET /auth/login?code=...
-  async googleLogin(code: string): Promise<string> {
+  // GET /auth/login?code=...&prompt=consent
+  async google(code: string): Promise<string> {
     let token: string;
     try {
-      const { data } = await axios.post("https://oauth2.googleapis.com/token", {
+      const { data } = await axios.post("https://www.googleapis.com/oauth2/v4/token", {
         client_id: config.googleClientId,
         client_secret: config.googleClientSecret,
-        redirect_uri: App.INSTANCE.publicUrl(this.url("/google")),
+        redirect_uri: "http://localhost:3000/v1/auth/google",
         grant_type: "authorization_code",
+        access_type: "offline",
         code,
       });
       token = data.access_token;
     } catch (ex) {
       if (ex instanceof AxiosError) {
         if (ex.response?.data?.error === "invalid_grant") {
-          throw badRequest("invalid_code");
+          throw invalid("code");
         }
+
+        if (ex.response?.data?.error === "redirect_uri_mismatch") {
+          throw invalid("redirect_uri");
+        }
+
         throw internal(ex);
       }
       throw ex;
@@ -115,9 +123,13 @@ export class AuthController extends Controller<V1Controller> {
       throw ex;
     }
 
-    console.log(email);
+    const user = await matchUser({ google: email });
+    if (!user) {
+      // TODO: User has to link the Google account first after creating a basic acc for now
+      throw notAuthenticated();
+    }
 
-    return;
+    return (await AuthController.generateToken(user, true))[0];
   }
 
   register(): void {
@@ -127,9 +139,10 @@ export class AuthController extends Controller<V1Controller> {
       accept<API.Request.Auth.SignUp, API.User>(
         async (data, _rq, rs) => {
           const [token, user] = await this.signUp(data);
-          rs.header("Authorization", token);
+          rs.set("Authorization", token);
           return user;
         },
+        API.Request.Auth.SignUp,
       ),
       "/signUp",
     );
@@ -138,9 +151,10 @@ export class AuthController extends Controller<V1Controller> {
       accept<API.Request.Auth.Credentials, API.User>(
         async (creds, _rq, rs) => {
           const [token, user] = await this.login(creds);
-          rs.header("Authorization", token);
+          rs.set("Authorization", token);
           return user;
         },
+        API.Request.Auth.Credentials,
       ),
       "/basic",
     );
@@ -160,31 +174,31 @@ export class AuthController extends Controller<V1Controller> {
           this.GOOGLE_LOGIN_URL = `https://accounts.google.com/o/oauth2/v2/auth?${queryStringify({
             client_id: config.googleClientId,
             redirect_uri: App.INSTANCE.publicUrl(this.url("/google")),
-            scope: "email",
+            scope: "openid email",
             response_type: "code",
-            access_type: "offline",
-            prompt: "consent",
+            // access_type: "offline",
+            // prompt: "consent",
           })}`;
         }
-  
-        this.logger.debug(this.GOOGLE_LOGIN_URL);
+
         return rs.redirect(301, this.GOOGLE_LOGIN_URL);
       }
 
       try {
-        await this.googleLogin(rq.query.code as string);
+        const token = await this.google(
+          rq.query.code as string,
+        );
+        return rs.redirect(301, AuthController.DASHBOARD_CALLBACK_URI + "?" + queryStringify({ token }));
       } catch (ex) {
         nxt(ex);
       }
-
-      nxt(success({ code: rq.query.code }));
     }, "/google");
   }
 
-  static async generateToken(user: User): Promise<[string, API.User.Self]> {
+  static async generateToken(user: User, doNotIncludeSelf = false): Promise<[string, API.User.Self]> {
     return [
       await serializeSecurityToken({ uid: user.id, login: user.login }),
-      user.asSelf(),
+      !doNotIncludeSelf ? user.asSelf() : null,
     ];
   }
 }
