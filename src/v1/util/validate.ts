@@ -1,7 +1,7 @@
 import type { ValidationError } from "class-validator";
 import { validate as validateClass } from "class-validator";
 
-import { todo } from "./status";
+import { badRequest, todo } from "./status";
 
 /**
  * Validates the given object.
@@ -18,7 +18,7 @@ export const validate = async <T extends object>(
   const errors: ValidationError[] = await validateClass(t);
   if (errors.length) {
     console.warn(errors); // TODO
-    throw todo("...");
+    throw badRequest("todo");
   }
   return t;
 };
