@@ -1,6 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 
 import type { SecurityPayload } from "./security";
+import type { Class } from "../../util/class";
 import type { MaybePromise } from "../../util/function";
 import type * as API from "../api";
 import { deserializeSecurityToken, serializeSecurityToken } from "./security";
@@ -22,12 +23,13 @@ export type UnauthenticatedCallback<T extends API.Request, R> = (
  */
 export const accept = <T extends API.Request, R>(
   fn: UnauthenticatedCallback<T, R>,
+  tClass?: Class<T>,
 ) => async (rq: Request, rs: Response, nxt: NextFunction): Promise<void> => {
   let result: R | unknown;
   try {
     result = await awaitIfNeeded(
       fn,
-      await validate(rq.body as T),
+      tClass ? await validate(Object.assign(new tClass(), rq.body) as T) : rq.body,
       rq,
       rs,
     );
