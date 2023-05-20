@@ -87,7 +87,7 @@ export class AuthController extends Controller<V1Controller> {
       const { data } = await axios.post("https://www.googleapis.com/oauth2/v4/token", {
         client_id: config.googleClientId,
         client_secret: config.googleClientSecret,
-        redirect_uri: "http://localhost:3000/v1/auth/google",
+        redirect_uri: App.INSTANCE.publicUrl(this.url("/google")),
         grant_type: "authorization_code",
         access_type: "offline",
         code,
