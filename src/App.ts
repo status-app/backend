@@ -1,3 +1,5 @@
+import "reflect-metadata";
+
 import type { NextFun, Request, Response } from "./types";
 import { Controller } from "./Controller";
 import { initializeDataSource } from "./data-source";

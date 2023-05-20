@@ -12,6 +12,7 @@
       "experimentalDecorators": true,
       "sourceMap": true,
       "esModuleInterop": true,
-      "noImplicitUseStrict": true
+      "noImplicitUseStrict": true,
+      "ignoreDeprecations": "5.0"
    }
 }
