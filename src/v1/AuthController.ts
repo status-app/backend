@@ -12,7 +12,7 @@ import { Controller } from "../Controller";
 import { userRepo } from "../data-source";
 import { stringify as queryStringify } from "querystring";
 import { App } from "../App";
-import { alreadyInUse, internal, invalid, notAuthenticated } from "./util/status";
+import { alreadyInUse, internal, invalid, notAuthenticated, todo } from "./util/status";
 
 export class AuthController extends Controller<V1Controller> {
   private static DASHBOARD_CALLBACK_URI = "http://localhost:3001/~";
@@ -88,7 +88,7 @@ export class AuthController extends Controller<V1Controller> {
       const { data } = await axios.post("https://www.googleapis.com/oauth2/v4/token", {
         client_id: config.googleClientId,
         client_secret: config.googleClientSecret,
-        redirect_uri: "http://localhost:3000/v1/auth/google",
+        redirect_uri: App.INSTANCE.publicUrl(this.url("/google")),
         grant_type: "authorization_code",
         access_type: "offline",
         code,
@@ -170,29 +170,36 @@ export class AuthController extends Controller<V1Controller> {
 
     // Google
     this.get(async (rq, rs, nxt) => {
-      if (!rq.query.code) {
-        if (!this.GOOGLE_LOGIN_URL) {
-          this.GOOGLE_LOGIN_URL = `https://accounts.google.com/o/oauth2/v2/auth?${queryStringify({
-            client_id: config.googleClientId,
-            redirect_uri: App.INSTANCE.publicUrl(this.url("/google")),
-            scope: "openid email",
-            response_type: "code",
-            // access_type: "offline",
-            // prompt: "consent",
-          })}`;
+      let args: string;
+      try {
+        if (!config.googleClientId || !config.googleClientSecret) {
+          throw internal("google_auth_not_configured");
+        }
+  
+        if (!rq.query.code) {
+          if (!this.GOOGLE_LOGIN_URL) {
+            this.GOOGLE_LOGIN_URL = `https://accounts.google.com/o/oauth2/v2/auth?${queryStringify({
+              client_id: config.googleClientId,
+              redirect_uri: App.INSTANCE.publicUrl(this.url("/google")),
+              scope: "openid email",
+              response_type: "code",
+              // access_type: "offline",
+              // prompt: "consent",
+            })}`;
+          }
+  
+          return rs.redirect(301, this.GOOGLE_LOGIN_URL);
         }
 
-        return rs.redirect(301, this.GOOGLE_LOGIN_URL);
-      }
-
-      try {
         const token = await this.google(
           rq.query.code as string,
         );
-        return rs.redirect(301, AuthController.DASHBOARD_CALLBACK_URI + "?" + queryStringify({ token }));
+        args = queryStringify({ token });
       } catch (ex) {
-        nxt(ex);
+        const res = (ex.status ? ex : internal(ex));
+        args = queryStringify({ error: `${res.status} ${res.error.message}` });
       }
+      rs.redirect(301, `${AuthController.DASHBOARD_CALLBACK_URI}?${args}`);
     }, "/google");
   }
 

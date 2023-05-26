@@ -1,3 +1,5 @@
+import "reflect-metadata";
+
 import type { Repository } from "typeorm";
 import { DataSource } from "typeorm";
 
@@ -7,14 +9,15 @@ import { User } from "./entity/User";
 
 // TODO .env
 
-const DATA_SOURCE = new DataSource({
-  type: "sqlite",
+export const DATA_SOURCE = new DataSource({
+  type: "better-sqlite3",
   database: "run/db.sqlite",
   synchronize: true,
   logging: config.debugEnabled,
-  entities: [ "src/entity/**/*.ts" ],
-  subscribers: [ "src/subscriber/**/*.ts" ],
-  migrations: [ "src/migration/**/*.ts" ],
+  migrationsRun: true,
+  entities: [ Service, User ],
+  subscribers: [ "src/subscriber/**/*.{js,ts}" ],
+  migrations: [ "src/migration/**/*.{js,ts}" ],
 });
 
 export const initializeDataSource = (): Promise<DataSource> =>
