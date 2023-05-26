@@ -43,9 +43,15 @@ export class Service extends Mixin(Identifiable, DateTimed) {
   @ManyToOne(() => User, (user) => user.services)
   owner!: User;
 
+  @Column()
+  uptime!: "ok" | "warn" | "critical";
+
   // TODO change to enum with MySQL
-  @Column({ type: "simple-enum", enum: V1ServiceMethod, default: V1ServiceMethod.HTTP })
+  @Column()
   method!: APIv1.Service.Method;
+
+  @Column()
+  host!: string;
 
   /**
    * @returns this {@link Service} as a {@link APIv1.Service.Public}.
@@ -55,7 +61,8 @@ export class Service extends Mixin(Identifiable, DateTimed) {
       id: this.id,
       name: this.name,
       description: this.description,
-      uptime: [], // TODO
+      method: {name: this.method, options: {host: this.host}},
+      uptime: this.uptime, // TODO
     };
   }
 }

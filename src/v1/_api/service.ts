@@ -29,11 +29,15 @@ class Service {
 
   description: string | null;
 
-  /**
-   * 30-items array of {@link API.Service.Uptime} items, one for
-   * every past 30 days, the first item being the most recent.
-   */
-  uptime: Uptime[];
+  // /**
+  //  * 30-items array of {@link API.Service.Uptime} items, one for
+  //  * every past 30 days, the first item being the most recent.
+  //  */
+  // uptime: Uptime[];
+
+  uptime: "ok" | "warn" | "critical";
+
+  method: { name: Method, options: { host: string } };
 }
 
 export class Public extends Service {}

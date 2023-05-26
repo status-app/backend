@@ -35,6 +35,7 @@ export class AuthController extends Controller<V1Controller> {
 
     const user = new User();
     user.login = login;
+    user.role = "admin";
     user.email = email;
     user.password = password;
     await validate(user);

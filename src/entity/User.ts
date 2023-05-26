@@ -21,7 +21,7 @@ export class User extends Mixin(Identifiable, DateTimed) {
   login!: string;
 
   // TODO change to enum with MySQL
-  @Column({ type: "simple-enum", enum: UserRole, default: UserRole.DEFAULT })
+  @Column()
   role!: APIv1.User.Role;
 
   @Column({ length: APIv1.User.EMAIL_MAX_LEN })

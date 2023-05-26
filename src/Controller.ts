@@ -84,6 +84,11 @@ export class Controller<P extends Controller<any>> {
     this._("patch", fun, path, ...args);
   }
 
+  protected _delete<T>(fun: RouterHandler<T>, path?: string, ...args: unknown[]): void {
+    this._("delete", fun, path, ...args);
+  }
+
+
   private _<T>(
     type: MethodString,
     fun: RouterHandler<T>,

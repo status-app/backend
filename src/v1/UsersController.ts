@@ -61,7 +61,7 @@ export class UserController extends Controller<V1Controller> {
           ? user
           : this.fromId(
             id,
-            user.role === "admin"
+            user.role !== "admin"
               ? API.User.Restricted
               : API.User.Public,
           );
